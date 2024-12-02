@@ -3,10 +3,10 @@ class UserManager:
     def __init__(self, db):
         self.db = db
 
-    def add_user(self, name):
+    def add_user(self, name,balance = 0):
         try:
             self.db.cursor.execute("INSERT INTO users (name) VALUES (?)", (name,))
-            self.db.cursor.execute("INSERT OR IGNORE INTO balances (user, balance) VALUES (?, 0)", (name,))
+            self.db.cursor.execute("INSERT OR IGNORE INTO balances (user, balance) VALUES (?, ?)", (name,balance,))
             self.db.conn.commit()
             return f"User '{name}' added successfully."
         except sqlite3.IntegrityError:

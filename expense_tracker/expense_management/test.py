@@ -36,6 +36,13 @@ def display_data():
 if __name__ == "__main__":
     # Add sample data
     #add_sample_data()
+    user_manager.remove_user("Charlie")
+
+    print(expense_manager.remove_expense(7))
+    display_data()
+    exit(2)
+    user_manager.add_user("Jacob")
+    user_manager.add_user("Peter",10000)
 
     # Query to get balances
 

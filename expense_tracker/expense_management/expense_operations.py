@@ -4,16 +4,15 @@ class ExpenseManager:
         self.db = db
 
     def add_expense(self, payer, amount, participants):
-        participants_str = ",".join(participants)
+        participants_str = ",".join(participants) #each participants sperated by a comma
         # need keep track of the definition of participants
-        # either the payer is involved or not
+        # either the payer is involved or not for calculating balances
 
         # Insert expense
         self.db.cursor.execute("""
             INSERT INTO expenses (payer, amount, participants)
             VALUES (?, ?, ?)
         """, (payer, amount, participants_str))
-
 
         self.db.conn.commit()
         return f"Expense of {amount} added for {payer}, split among {participants}."
@@ -28,7 +27,6 @@ class ExpenseManager:
         expense = self.db.cursor.fetchone()
         if not expense:
             return f"Expense with ID {expense_id} does not exist."
-
 
         self.db.cursor.execute("DELETE FROM expenses WHERE id = ?", (expense_id,))
         self.db.conn.commit()
