@@ -1,7 +1,11 @@
 import sqlite3
 
 class DatabaseManager:
+<<<<<<< HEAD
     def __init__(self, db_name="./expense_tracker/expense_tracker.db"):
+=======
+    def __init__(self, db_name="./who-owes-who/expense_tracker/expense_tracker.db"):
+>>>>>>> expense_management
         self.conn = sqlite3.connect(db_name)
         self.cursor = self.conn.cursor()
         self._create_tables()
