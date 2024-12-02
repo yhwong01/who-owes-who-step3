@@ -4,11 +4,10 @@ from expense_operations import ExpenseManager
 ##from balance_calculation import BalanceCalculator
 
 # Initialize the database and managers
-db = DatabaseManager()
+db = DatabaseManager(db_name="../expense_tracker.db")
 user_manager = UserManager(db)
 expense_manager = ExpenseManager(db)
 #balance_calculator = BalanceCalculator(db)
-
 
 # Function to add sample data
 def add_sample_data():
@@ -34,26 +33,34 @@ def display_data():
     for expense in expense_manager.list_expenses():
         print(expense)
 
-
-
-# Function to settle debts
-def settle_debts():
-    print("\nSettling debts...")
-    transactions = expense_manager.settle_debt()
-    for transaction in transactions:
-        print(transaction)
-
-
-# Main logic
 if __name__ == "__main__":
     # Add sample data
     #add_sample_data()
+
+    # Query to get balances
+
+    db.cursor.execute("SELECT * from balances;")
+    # Fetch all table names
+    tables = db.cursor.fetchall()
+
+    # Print the list of tables
+    print("Tables in the database:")
+    for table in tables:
+        print(table)
 
     # Display current data
     display_data()
 
     # Settle debts and display the results
-    #settle_debts()
+    #expense_manager.settle_debt(payer="Alice",receiver="David", amount= 20)
+    display_data()
+
+    db.cursor.execute("SELECT * from balances;")
+    tables = db.cursor.fetchall()
+
+    print("Tables in the database:")
+    for table in tables:
+        print(table)
 
     # Close the database connection
-    #db.close()
+    db.close()

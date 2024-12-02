@@ -3,3 +3,5 @@
 
 # Ignore .venv folder (commonly used for Python virtual environments)
 .venv/
+
+.DS_Store
