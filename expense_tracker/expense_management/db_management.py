@@ -1,11 +1,7 @@
 import sqlite3
 
 class DatabaseManager:
-<<<<<<< HEAD
-    def __init__(self, db_name="./expense_tracker/expense_tracker.db"):
-=======
     def __init__(self, db_name="./who-owes-who/expense_tracker/expense_tracker.db"):
->>>>>>> expense_management
         self.conn = sqlite3.connect(db_name)
         self.cursor = self.conn.cursor()
         self._create_tables()
@@ -38,6 +34,19 @@ class DatabaseManager:
                 FOREIGN KEY (user) REFERENCES users(name)
             )
         """)
+
+        # Calculate and store the detailed debts between specific creditors and debtors for all recorded expenses
+        self.cursor.execute("""
+             CREATE TABLE debts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                creditor TEXT NOT NULL,
+                debtor TEXT NOT NULL,
+                amount REAL NOT NULL,
+                FOREIGN KEY (creditor) REFERENCES users(name),
+                FOREIGN KEY (debtor) REFERENCES users(name)
+            )
+        """)
+
 
         self.conn.commit()
 
