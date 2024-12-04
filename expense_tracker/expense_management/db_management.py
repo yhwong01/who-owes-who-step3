@@ -40,5 +40,15 @@ class DatabaseManager:
 
         self.conn.commit()
 
+        # Balances table (tracks net balances)
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS balances (
+                user TEXT PRIMARY KEY,
+                balance REAL NOT NULL DEFAULT 0,
+                FOREIGN KEY (user) REFERENCES users(name)
+            )
+        """)
+        self.conn.commit()
+
     def close(self):
         self.conn.close()

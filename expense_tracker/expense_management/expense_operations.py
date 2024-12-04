@@ -32,31 +32,29 @@ class ExpenseManager:
         self.db.conn.commit()
         return f"Expense with ID {expense_id} removed successfully."
 
-
-
     def settle_debt(self, payer: str, receiver: str, amount: float):
         """
         Settle a portion of the debt by recording a payment from the payer to the receiver.
+
+        Args:
+            payer (str): The name of the person making the payment.
+            receiver (str): The name of the person receiving the payment.
+            amount (float): The amount being paid.
+
+        Raises:
+            ValueError: If the amount is not positive or if no debt exists between the payer and receiver.
         """
         if amount <= 0:
             raise ValueError("Amount must be a positive number.")
-
         try:
-
-            #update the table by adding a debt paid by payer to receiver
-            self.db.cursor.execute("""
-                    UPDATE debt_records
-                    SET amount = ?
-                    WHERE creditor = ? AND debtor = ?
-                """, (amount, receiver, payer))
+            self.db.cursor.execute("UPDATE balances SET balance = balance + ? WHERE user = ?", (amount, receiver))
+            self.db.cursor.execute("UPDATE balances SET balance = balance - ? WHERE user = ?", (amount, payer))
 
             # Commit changes
             self.db.conn.commit()
-            return print(
-                f"Payment of {amount:.2f} from {payer} to {receiver} recorded successfully.")
+            return print(f"Payment of {amount:.2f} from {payer} to {receiver} recorded successfully.")
         except Exception as e:
             self.db.conn.rollback()
             raise e
-
 
 

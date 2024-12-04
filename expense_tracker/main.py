@@ -8,7 +8,8 @@ from expense_management.expense_operations import ExpenseManager
 
 def add_user(user_manager):
     name = input("Enter the name of the user to add: ").strip()
-    result = user_manager.add_user(name)
+    bal = float(input("Enter initial balance of the user: "))
+    result = user_manager.add_user(name,bal)
     print(result)
 
 def add_expense(expense_manager):
@@ -23,14 +24,14 @@ def list_users(user_manager):
     print("\nList of Users:")
     for user in user_manager.list_users():
         print(f"- {user}")
-
+    print(f'Total number of Users: {len(user_manager.list_users())}')
 def list_expenses(expense_manager):
     print("\nList of Expenses:")
     for expense in expense_manager.list_expenses():
         print(f"- ID: {expense[0]}, Payer: {expense[1]}, Amount: {expense[2]}, Participants: {expense[3]}")
 
 def show_balances(balance_calculator):
-    print("\nCurrent Balances:")
+    print("\nCurrent Balances: ")
     balances = balance_calculator.calculate_balances()
     for user, balance in balances.items():
         print(f"{user}: {balance:.2f}")
@@ -57,14 +58,22 @@ def simplify_debts(balance_calculator):
     balances = balance_calculator.calculate_balances()
     report_generator.visualize_balances(balances)'''
 
-def settle_debts(expense_manager, balance_calculator):
-    print("\nSettling debts...")
-    transactions = expense_manager.settle_debt()
-    for transaction in transactions:
-        print(transaction)
+def settle_debts(expense_manager):
+    print("\n--- Settle a Debt ---")
+    payer = input("Enter the name of the payer: ").strip()
+    receiver = input("Enter the name of the receiver: ").strip()
+    try:
+        amount = float(input("Enter the amount to settle: ").strip())
+        if amount <= 0:
+            print("Amount must be a positive number.")
+            return
 
-    print("\nUpdated Balances:")
-    show_balances(balance_calculator)
+        # Call the updated settle_debt method
+        expense_manager.settle_debt(payer, receiver, amount)
+    except ValueError:
+        print("Invalid amount. Please enter a valid number.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 def main():
     # Initialize database and managers
@@ -100,8 +109,10 @@ def main():
         elif choice == "4":
             list_expenses(expense_manager)
         elif choice == "5":
+            pass
             show_balances(balance_calculator)
         elif choice == "6":
+            pass
             simplify_debts(balance_calculator)
         elif choice == "7":
             pass
@@ -110,7 +121,8 @@ def main():
             pass
             #visualize_balances(report_generator, balance_calculator)
         elif choice == "9":
-            settle_debts(expense_manager, balance_calculator)
+            pass
+            settle_debts(expense_manager)
         elif choice == "10":
             print("\n--- Thank you for using Expense Tracker! Goodbye! ---")
             break
