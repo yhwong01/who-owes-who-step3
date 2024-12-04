@@ -2,17 +2,16 @@ import sqlite3
 from expense_management.db_management import DatabaseManager
 from reporting_tools.balance_calculation import BalanceManager
 
-
-
 def test_balance_manager():
-    db = DatabaseManager(db_name="expense_tracker.db")  #use expense_tracker
+    # Setup: Create an in-memory database for testing
+    db = DatabaseManager(":memory:")  # Use in-memory SQLite for testing
     balance_manager = BalanceManager(db)
 
     # Add sample users and expenses
-    #deleted
-
-
-    '''db.cursor.executemany(
+    db.cursor.executemany(
+        "INSERT INTO users (name) VALUES (?)", [("Alice",), ("Bob",), ("Charlie",)]
+    )
+    db.cursor.executemany(
         """
         INSERT INTO expenses (payer, amount, participants) 
         VALUES (?, ?, ?)
@@ -22,23 +21,16 @@ def test_balance_manager():
             ("Bob", 20, "Bob,Charlie"),          # Bob pays 20, split with Charlie
         ],
     )
-    db.conn.commit()'''
+    db.conn.commit()
 
-<<<<<<< HEAD
     # Test: Calculate debts
     balance_manager.calculate_debts()
     debts = db.cursor.execute("SELECT * FROM debts").fetchall()
-    assert len(debts) == 3  # Check that all debts are recorded
-=======
-    # Test: Calculate balances
-    balance_manager.calculate_balances()
-    debts = db.cursor.execute("SELECT * FROM balances").fetchall()
-    #assert len(debts) == 4  # Check that all debts are recorded
->>>>>>> origin/expense_management
+    assert len(debts) == 4  # Check that all debts are recorded
     print("Debts after calculate_balances:", debts)
 
     # Test: Simplify debts
-    balance_manager.calculate_debts()
+    balance_manager.simplify_debts()
     simplified_debts = db.cursor.execute("SELECT * FROM debts").fetchall()
     print("Debts after simplify_debts:", simplified_debts)
 
