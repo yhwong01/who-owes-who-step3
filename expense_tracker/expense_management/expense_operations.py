@@ -1,3 +1,4 @@
+import sqlite3
 class Manager:
     def __init__(self,name):
         self.name = "Manager"
@@ -43,24 +44,19 @@ class ExpenseManager(Manager):
     def settle_debt(self, payer: str, receiver: str, amount: float):
         """
         Settle a portion of the debt by recording a payment from the payer to the receiver.
-
-        Args:
-            payer (str): The name of the person making the payment.
-            receiver (str): The name of the person receiving the payment.
-            amount (float): The amount being paid.
-
-        Raises:
-            ValueError: If the amount is not positive or if no debt exists between the payer and receiver.
         """
         if amount <= 0:
             raise ValueError("Amount must be a positive number.")
         try:
-            self.db.cursor.execute("UPDATE balances SET balance = balance + ? WHERE user = ?", (amount, receiver))
-            self.db.cursor.execute("UPDATE balances SET balance = balance - ? WHERE user = ?", (amount, payer))
+            #self.db.cursor.execute("UPDATE balances SET balance = balance + ? WHERE user = ?", (amount, receiver))
+            #self.db.cursor.execute("UPDATE balances SET balance = balance - ? WHERE user = ?", (amount, payer))
 
+            self.db.cursor.execute("UPDATE debts SET amount = amount - ? where creditor = ? and debtor = ?",
+            (amount,receiver,payer))
             # Commit changes
             self.db.conn.commit()
             return print(f"Payment of {amount:.2f} from {payer} to {receiver} recorded successfully.")
+
         except Exception as e:
             self.db.conn.rollback()
             raise e
