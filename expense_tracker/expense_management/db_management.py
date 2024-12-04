@@ -34,7 +34,7 @@ class DatabaseManager:
                 debtor TEXT NOT NULL,
                 amount REAL NOT NULL,
                 FOREIGN KEY (creditor) REFERENCES users(name),
-                FOREIGN KEY (debtor) REFERENCES users(name)
+                FOREIGN KEY (debtor) REFERENCES users(name),
             )
         """)
 
@@ -48,6 +48,7 @@ class DatabaseManager:
                 FOREIGN KEY (user) REFERENCES users(name)
             )
         """)
+
         self.conn.commit()
 
     def close(self):
