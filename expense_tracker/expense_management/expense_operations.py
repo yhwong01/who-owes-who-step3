@@ -1,6 +1,14 @@
+class Manager:
+    def __init__(self,name):
+        self.name = "Manager"
 
-class ExpenseManager:
-    def __init__(self, db):
+    def __str__(self):
+        return self.name
+
+class ExpenseManager(Manager):
+
+    def __init__(self,db,name="ExpenseManager"):
+        super().__init__(name)
         self.db = db
 
     def add_expense(self, payer, amount, participants):

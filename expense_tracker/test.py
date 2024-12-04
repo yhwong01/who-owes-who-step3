@@ -2,8 +2,6 @@ import sqlite3
 from expense_management.db_management import DatabaseManager
 from reporting_tools.balance_calculation import BalanceManager
 
-
-
 def test_balance_manager():
     db = DatabaseManager(db_name="expense_tracker.db")  #use expense_tracker
     balance_manager = BalanceManager(db)
@@ -33,7 +31,11 @@ def test_balance_manager():
     # Test: Simplify debts
     balance_manager.calculate_debts()
     simplified_debts = db.cursor.execute("SELECT * FROM debts").fetchall()
-    print("Debts after simplify_debts:", simplified_debts)
+    print("Debts after cal_debts:", simplified_debts)
+
+    balance_manager.simplify_debts()
+    simplified_debts = db.cursor.execute("SELECT * FROM debts").fetchall()
+    print("Debts after cal_debts:", simplified_debts)
 
     # Test: Get user debts
     alice_debts = balance_manager.get_user_debts("Alice")

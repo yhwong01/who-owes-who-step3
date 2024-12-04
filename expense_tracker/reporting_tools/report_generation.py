@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
-from expense_tracker.expense_management.db_management import *
+import os
+from datetime import datetime
+from expense_tracker.expense_management.db_management import DatabaseManager
 
-class report_generation:
+class ReportGeneration:
     def __init__(self, db):
         self.db = db
 
@@ -15,23 +17,26 @@ class report_generation:
         Returns:
             str or dict: The formatted summary.
         """
+        # Fetch expenses and debts from the database
         self.db.cursor.execute("SELECT * FROM expenses")
         expenses = self.db.cursor.fetchall()
 
         self.db.cursor.execute("SELECT debtor, creditor, amount FROM debts")
         debts = self.db.cursor.fetchall()
-        self.db.close()
 
+        # Generate the summary
         if format == "text":
-            summary = "Expense Summary:\n"
+            summary = f"Expense Report (Generated on {datetime.now()}):\n"
+            summary += "\nExpense Details:\n"
             for expense in expenses:
-                summary += f"- Payer: {expense[1]}, Amount: {expense[2]}, Participants: {expense[3]}\n"
-            summary += "\nDebt Summary:\n"
+                summary += f"- Payer: {expense[1]}, Amount: {expense[2]:.2f}, Participants: {expense[3]}\n"
+            summary += "\nDebt Details:\n"
             for debt in debts:
-                summary += f"- Debtor: {debt[0]}, Creditor: {debt[1]}, Amount: {debt[2]}\n"
+                summary += f"- Debtor: {debt[0]}, Creditor: {debt[1]}, Amount: {debt[2]:.2f}\n"
             return summary
         elif format == "json":
             summary = {
+                "timestamp": datetime.now().isoformat(),
                 "expenses": [{"payer": e[1], "amount": e[2], "participants": e[3]} for e in expenses],
                 "debts": [{"debtor": d[0], "creditor": d[1], "amount": d[2]} for d in debts],
             }
@@ -39,36 +44,42 @@ class report_generation:
         else:
             raise ValueError("Invalid format. Choose 'text' or 'json'.")
 
-    def export_report(self, format="txt"):
+    def export_report(self, file_format="txt"):
         """
         Export the summary report to a file.
 
         Parameters:
-            format (str): File format ("txt" or "csv").
+            file_format (str): File format ("txt", "csv", or "xlsx").
         """
-        summary = self.generate_summary(format="text" if format == "txt" else "json")
+        summary = self.generate_summary(format="text" if file_format == "txt" else "json")
+        file_name = f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
-        if format == "txt":
-            with open("report.txt", "w") as file:
+        if file_format == "txt":
+            with open(f"{file_name}.txt", "w") as file:
                 file.write(summary)
-        elif format == "csv":
+        elif file_format == "csv":
             import csv
-            with open("report.csv", "w", newline="") as file:
+            with open(f"{file_name}.csv", "w", newline="") as file:
                 writer = csv.writer(file)
                 writer.writerow(["Debtor", "Creditor", "Amount"])
                 for debt in summary["debts"]:
                     writer.writerow([debt["debtor"], debt["creditor"], debt["amount"]])
+        elif file_format == "xlsx":
+            import pandas as pd
+            df = pd.DataFrame(summary["debts"])
+            df.to_excel(f"{file_name}.xlsx", index=False)
         else:
-            raise ValueError("Invalid format. Choose 'txt' or 'csv'.")
-        
+            raise ValueError("Invalid format. Choose 'txt', 'csv', or 'xlsx'.")
 
-    def visualize_debts(self):
+    def visualize_debts(self, save_to_file=False):
         """
         Visualize debts using bar and pie charts.
+
+        Parameters:
+            save_to_file (bool): Whether to save the charts as files.
         """
         self.db.cursor.execute("SELECT debtor, creditor, amount FROM debts")
         debts = self.db.cursor.fetchall()
-        self.db.close()
 
         # Aggregate debts by debtor for visualization
         debtor_totals = {}
@@ -78,15 +89,20 @@ class report_generation:
         # Bar chart
         debtors = list(debtor_totals.keys())
         amounts = list(debtor_totals.values())
-        plt.bar(debtors, amounts, color="salmon")
+        plt.bar(debtors, amounts, color="skyblue")
         plt.title("Debts per Debtor")
         plt.xlabel("Debtor")
         plt.ylabel("Total Amount Owed")
+        plt.xticks(rotation=45, ha="right")
+        plt.tight_layout()
+        if save_to_file:
+            plt.savefig("debts_bar_chart.png")
         plt.show()
 
-        # Pie chart (optional)
+        # Pie chart
         plt.pie(amounts, labels=debtors, autopct="%1.1f%%", startangle=90)
         plt.title("Debt Distribution")
         plt.axis("equal")
+        if save_to_file:
+            plt.savefig("debts_pie_chart.png")
         plt.show()
-
