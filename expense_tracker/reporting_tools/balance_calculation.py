@@ -1,3 +1,6 @@
+#from expense_tracker.expense_management.test import expense_manager
+
+
 class BalanceManager:
     def __init__(self, db):
         self.db = db
@@ -7,6 +10,8 @@ class BalanceManager:
         self.db.cursor.execute("SELECT payer, amount, participants FROM expenses")
         expenses = self.db.cursor.fetchall()
 
+        #added
+        print(expenses)
         # Reset balances
         self.db.cursor.execute("UPDATE balances SET balance = 0")
 
@@ -45,17 +50,23 @@ class BalanceManager:
             participants = expense[3].split(",")
             share = amount / len(participants)
 
-        for participant in participants:
-            if participant != payer:
-                self.db.cursor.execute(
-                    """
-                    INSERT INTO debts (creditor, debtor, amount)
-                    VALUES (?, ?, ?)
-                    ON CONFLICT(creditor, debtor)
-                    DO UPDATE SET amount = amount + ?
-                    """,
-                    (payer, participant, share, share)
-                )
+            payer = expense[1]
+            amount = expense[2]
+            participants = expense[3].split(",")
+            share = amount / len(participants)
+            print(payer,amount,participants)
+
+            for participant in participants:
+                if participant != payer:
+                    self.db.cursor.execute(
+                        """
+                        INSERT INTO debts (creditor, debtor, amount)
+                        VALUES (?, ?, ?)
+                        ON CONFLICT(creditor, debtor)
+                        DO UPDATE SET amount = amount + ?
+                        """,
+                        (payer, participant, share, share)
+                    )
                     
         self.db.conn.commit()
 
@@ -66,6 +77,7 @@ class BalanceManager:
 
         # Build a debt map
         for debt in debts:
+            print(debt)
             creditor, debtor, amount = debt["creditor"], debt["debtor"], debt["amount"]
             debt_map.setdefault(creditor, {}).setdefault(debtor, 0)
             debt_map[creditor][debtor] += amount
@@ -74,6 +86,7 @@ class BalanceManager:
         self.db.cursor.execute("DELETE FROM debts")  # Clear old debts
         for creditor, relations in debt_map.items():
             for debtor, amount in relations.items():
+                print(debtor, amount)
                 if amount > 0:
                     self.db.cursor.execute(
                         "INSERT INTO debts (creditor, debtor, amount) VALUES (?, ?, ?)",

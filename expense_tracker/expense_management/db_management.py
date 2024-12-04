@@ -26,6 +26,20 @@ class DatabaseManager:
             )
         """)
 
+        # Calculate and store the detailed debts between specific creditors and debtors for all recorded expenses
+        self.cursor.execute("""
+             CREATE TABLE IF NOT EXISTS debts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                creditor TEXT NOT NULL,
+                debtor TEXT NOT NULL,
+                amount REAL NOT NULL,
+                FOREIGN KEY (creditor) REFERENCES users(name),
+                FOREIGN KEY (debtor) REFERENCES users(name),
+            )
+        """)
+
+        self.conn.commit()
+
         # Balances table (tracks net balances)
         self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS balances (
