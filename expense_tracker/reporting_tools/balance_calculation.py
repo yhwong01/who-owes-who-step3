@@ -71,28 +71,57 @@ class BalanceManager:
         self.db.conn.commit()
 
     def simplify_debts(self):
-        """Simplify debt relationships to minimize transactions."""
-        debts = self.db.cursor.execute("SELECT * FROM debts").fetchall()
+        """
+        Simplify debt relationships to minimize transactions.
+        """
+        debts = self.db.cursor.execute("SELECT creditor, debtor, amount FROM debts").fetchall()
         debt_map = {}  # {creditor: {debtor: amount}}
 
-        # Build a debt map
+        # Build a debt map from the existing debts
         for debt in debts:
-            print(debt)
-            creditor, debtor, amount = debt["creditor"], debt["debtor"], debt["amount"]
+            creditor, debtor, amount = debt
             debt_map.setdefault(creditor, {}).setdefault(debtor, 0)
             debt_map[creditor][debtor] += amount
 
-        # Update the debts table with simplified values
-        self.db.cursor.execute("DELETE FROM debts")  # Clear old debts
+        # Create a net balance map from the debt map
+        net_balances = {}  # {person: net_balance}
         for creditor, relations in debt_map.items():
             for debtor, amount in relations.items():
-                print(debtor, amount)
-                if amount > 0:
-                    self.db.cursor.execute(
-                        "INSERT INTO debts (creditor, debtor, amount) VALUES (?, ?, ?)",
-                        (creditor, debtor, amount)
-                    )
+                net_balances[creditor] = net_balances.get(creditor, 0) + amount
+                net_balances[debtor] = net_balances.get(debtor, 0) - amount
+
+        # Separate people into creditors and debtors
+        creditors = [(person, balance) for person, balance in net_balances.items() if balance > 0]
+        debtors = [(person, -balance) for person, balance in net_balances.items() if balance < 0]
+
+        # Simplify transactions
+        simplified_transactions = []
+        while creditors and debtors:
+            creditor, credit_amount = creditors.pop(0)
+            debtor, debt_amount = debtors.pop(0)
+
+            settled_amount = min(credit_amount, debt_amount)
+            simplified_transactions.append((debtor, creditor, settled_amount))
+
+            credit_remaining = credit_amount - settled_amount
+            debt_remaining = debt_amount - settled_amount
+
+            if credit_remaining > 0:
+                creditors.insert(0, (creditor, credit_remaining))
+            if debt_remaining > 0:
+                debtors.insert(0, (debtor, debt_remaining))
+
+        # Update the debts table with simplified values
+        self.db.cursor.execute("DELETE FROM debts")  # Clear old debts
+        for debtor, creditor, amount in simplified_transactions:
+            self.db.cursor.execute(
+                "INSERT INTO debts (creditor, debtor, amount) VALUES (?, ?, ?)",
+                (creditor, debtor, amount)
+            )
         self.db.conn.commit()
+
+        return simplified_transactions
+
 
     def get_user_debts(self, user):
         """Retrieve detailed debt information for a specific user."""

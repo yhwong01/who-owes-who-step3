@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import os
 from datetime import datetime
-from expense_tracker.expense_management.db_management import DatabaseManager
 
 class ReportGeneration:
     def __init__(self, db):

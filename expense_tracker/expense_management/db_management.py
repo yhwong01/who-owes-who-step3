@@ -34,7 +34,7 @@ class DatabaseManager:
                 debtor TEXT NOT NULL,
                 amount REAL NOT NULL,
                 FOREIGN KEY (creditor) REFERENCES users(name),
-                FOREIGN KEY (debtor) REFERENCES users(name),
+                FOREIGN KEY (debtor) REFERENCES users(name)
             )
         """)
 
