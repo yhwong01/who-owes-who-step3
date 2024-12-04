@@ -1,13 +1,11 @@
-from db_management import DatabaseManager
+from expense_tracker.expense_management.db_management import DatabaseManager
 from user_management import UserManager
 from expense_operations import ExpenseManager
-##from balance_calculation import BalanceCalculator
 
 # Initialize the database and managers
 db = DatabaseManager(db_name="../expense_tracker.db")
 user_manager = UserManager(db)
 expense_manager = ExpenseManager(db)
-#balance_calculator = BalanceCalculator(db)
 
 # Function to add sample data
 def add_sample_data():
@@ -68,6 +66,9 @@ if __name__ == "__main__":
     print("Tables in the database:")
     for table in tables:
         print(table)
+
+    # test balance_calculation
+    balance_calculator.calculate_balances()
 
     # Close the database connection
     db.close()

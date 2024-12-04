@@ -62,32 +62,31 @@ class report_generation:
             raise ValueError("Invalid format. Choose 'txt' or 'csv'.")
         
 
-def visualize_debts():
-    """
-    Visualize debts using bar and pie charts.
-    """
-    db = DatabaseManager()
-    db.cursor.execute("SELECT debtor, creditor, amount FROM debts")
-    debts = db.cursor.fetchall()
-    db.close()
+    def visualize_debts(self):
+        """
+        Visualize debts using bar and pie charts.
+        """
+        self.db.cursor.execute("SELECT debtor, creditor, amount FROM debts")
+        debts = self.db.cursor.fetchall()
+        self.db.close()
 
-    # Aggregate debts by debtor for visualization
-    debtor_totals = {}
-    for debt in debts:
-        debtor_totals[debt[0]] = debtor_totals.get(debt[0], 0) + debt[2]
+        # Aggregate debts by debtor for visualization
+        debtor_totals = {}
+        for debt in debts:
+            debtor_totals[debt[0]] = debtor_totals.get(debt[0], 0) + debt[2]
 
-    # Bar chart
-    debtors = list(debtor_totals.keys())
-    amounts = list(debtor_totals.values())
-    plt.bar(debtors, amounts, color="salmon")
-    plt.title("Debts per Debtor")
-    plt.xlabel("Debtor")
-    plt.ylabel("Total Amount Owed")
-    plt.show()
+        # Bar chart
+        debtors = list(debtor_totals.keys())
+        amounts = list(debtor_totals.values())
+        plt.bar(debtors, amounts, color="salmon")
+        plt.title("Debts per Debtor")
+        plt.xlabel("Debtor")
+        plt.ylabel("Total Amount Owed")
+        plt.show()
 
-    # Pie chart (optional)
-    plt.pie(amounts, labels=debtors, autopct="%1.1f%%", startangle=90)
-    plt.title("Debt Distribution")
-    plt.axis("equal")
-    plt.show()
+        # Pie chart (optional)
+        plt.pie(amounts, labels=debtors, autopct="%1.1f%%", startangle=90)
+        plt.title("Debt Distribution")
+        plt.axis("equal")
+        plt.show()
 
