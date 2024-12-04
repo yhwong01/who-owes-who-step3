@@ -1,6 +1,10 @@
 import matplotlib.pyplot as plt
 import os
 from datetime import datetime
+<<<<<<< HEAD
+=======
+from expense_tracker.expense_management.db_management import DatabaseManager
+>>>>>>> origin/expense_management
 
 class ReportGeneration:
     def __init__(self, db):
@@ -104,4 +108,8 @@ class ReportGeneration:
         plt.axis("equal")
         if save_to_file:
             plt.savefig("debts_pie_chart.png")
+<<<<<<< HEAD
         plt.show()
+=======
+        plt.show()
+>>>>>>> origin/expense_management

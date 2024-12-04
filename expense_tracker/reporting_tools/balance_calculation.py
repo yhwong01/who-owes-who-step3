@@ -1,43 +1,6 @@
-#from expense_tracker.expense_management.test import expense_manager
-
-
 class BalanceManager:
     def __init__(self, db):
         self.db = db
-    
-    def calculate_balances(self):
-        # Fetch all expenses
-        self.db.cursor.execute("SELECT payer, amount, participants FROM expenses")
-        expenses = self.db.cursor.fetchall()
-
-        #added
-        print(expenses)
-        # Reset balances
-        self.db.cursor.execute("UPDATE balances SET balance = 0")
-
-        # Calculate balances
-        for payer, amount, participants in expenses:
-            participants_list = participants.split(",")
-            share = amount / len(participants_list)
-
-            # Update payer's balance
-            self.db.cursor.execute("""
-                INSERT INTO balances (user, balance) 
-                VALUES (?, ?) 
-                ON CONFLICT(user) DO UPDATE SET balance = balance + ?
-            """, (payer, amount - share * len(participants_list), amount - share * len(participants_list)))
-
-            # Update participants' balances
-            for participant in participants_list:
-                if participant != payer:
-                    self.db.cursor.execute("""
-                        INSERT INTO balances (user, balance) 
-                        VALUES (?, ?) 
-                        ON CONFLICT(user) DO UPDATE SET balance = balance - ?
-                    """, (participant, -share, share))
-
-        # Commit the changes
-        self.db.conn.commit()
 
     def calculate_debts(self):
         """Calculate detailed debts between users."""
@@ -49,11 +12,6 @@ class BalanceManager:
             amount = expense[2] # access amount
             participants = expense[3].split(",")
             share = amount / len(participants)
-
-            payer = expense[1]
-            amount = expense[2]
-            participants = expense[3].split(",")
-            share = amount / len(participants)
             print(payer,amount,participants)
 
             for participant in participants:
@@ -62,12 +20,11 @@ class BalanceManager:
                         """
                         INSERT INTO debts (creditor, debtor, amount)
                         VALUES (?, ?, ?)
-                        ON CONFLICT(creditor, debtor)
-                        DO UPDATE SET amount = amount + ?
-                        """,
+                        ON CONFLICT(creditor, debtor) DO UPDATE SET amount = amount + ?""",
                         (payer, participant, share, share)
                     )
-                    
+
+                    '''ON CONFLICT(creditor, debtor) DO UPDATE SET amount = amount + ?'''
         self.db.conn.commit()
 
     def simplify_debts(self):
@@ -79,7 +36,7 @@ class BalanceManager:
 
         # Build a debt map from the existing debts
         for debt in debts:
-            creditor, debtor, amount = debt
+            creditor, debtor, amount = debt[1], debt[2], debt[3]
             debt_map.setdefault(creditor, {}).setdefault(debtor, 0)
             debt_map[creditor][debtor] += amount
 
@@ -132,12 +89,19 @@ class BalanceManager:
         debtors = self.db.cursor.execute(
             "SELECT creditor, amount FROM debts WHERE debtor = ?", (user,)
         ).fetchall()
+        print("creditors")
+        for item in creditors:
+            print(item)
 
-        result = {
+        print("debtors")
+        for item in debtors:
+            print(item)
+        '''result = {
             "owed_by_others": [{"debtor": row["debtor"], "amount": row["amount"]} for row in creditors],
             "owes_to_others": [{"creditor": row["creditor"], "amount": row["amount"]} for row in debtors],
-        }
-        return result
+        }'''
+        #return result
+        return
 
 
 

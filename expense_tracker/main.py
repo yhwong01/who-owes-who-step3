@@ -2,9 +2,8 @@ from expense_management.db_management import DatabaseManager
 from expense_management.user_management import UserManager
 from expense_management.expense_operations import ExpenseManager
 
-#pending
-#from reporting_tools.balance_calculation import BalanceCalculator
-#from reporting_tools.report_generation import ReportGenerator
+from reporting_tools.balance_calculation import BalanceManager
+from reporting_tools.report_generation import ReportGeneration
 
 def add_user(user_manager):
     name = input("Enter the name of the user to add: ").strip()
@@ -33,37 +32,39 @@ def list_expenses(expense_manager):
 def show_balances(balance_calculator):
     print("\nCurrent Balances: ")
     balances = balance_calculator.calculate_balances()
-    for user, balance in balances.items():
-        print(f"{user}: {balance:.2f}")
 
 def simplify_debts(balance_calculator):
-    print("\nSuggested Debt Simplifications:")
-    suggestions = balance_calculator.simplify_debts()
-    for suggestion in suggestions:
-        print(suggestion)
+    balance_calculator.simplify_debts()
+    print("Debt Simplified :)")
 
-'''def generate_report(report_generator, balance_calculator):
+def generate_report(report_generator, balance_calculator):
     print("\nGenerating Report...")
     balances = balance_calculator.calculate_balances()
-    report_generator.generate_summary(balances)
-    format_choice = input("Enter report format (txt or csv): ").strip().lower()
+    format_choice = input("Enter report format ('text' or 'json'): ").strip().lower()
+    if format_choice in ["text", "json"]:
+        print(report_generator.generate_summary(format_choice))
+    else:
+        print("Invalid format. Report generation canceled.")
+
+    """format_choice = input("Enter report format (txt or csv): ").strip().lower()
     if format_choice in ["txt", "csv"]:
         report_generator.export_report(balances, format=format_choice)
         print(f"Report exported as {format_choice}.")
     else:
-        print("Invalid format. Report generation canceled.")'''
+        print("Invalid format. Report generation canceled.")"""
+    return
 
-'''def visualize_balances(report_generator, balance_calculator):
+def visualize_balances(report_generator, balance_calculator):
     print("\nVisualizing Balances...")
     balances = balance_calculator.calculate_balances()
-    report_generator.visualize_balances(balances)'''
+    report_generator.visualize_debts(balances)
 
 def settle_debts(expense_manager):
     print("\n--- Settle a Debt ---")
     payer = input("Enter the name of the payer: ").strip()
     receiver = input("Enter the name of the receiver: ").strip()
     try:
-        amount = float(input("Enter the amount to settle: ").strip())
+        amount = float(input("Enter the amount to settle: "))
         if amount <= 0:
             print("Amount must be a positive number.")
             return
@@ -74,17 +75,22 @@ def settle_debts(expense_manager):
         print("Invalid amount. Please enter a valid number.")
     except Exception as e:
         print(f"An error occurred: {e}")
+def export_report(report_generator, balance_calculator):
+    format_choice = input("Enter report format (txt, csv, or xlsx): ").lower()
+    if format_choice in ["txt","csv","xlsx"]:
+        print(report_generator.export_report(format_choice))
+    else:
+        print("Invalid format. Report export canceled.")
 
 def main():
     # Initialize database and managers
     db = DatabaseManager(db_name="expense_tracker.db")
     user_manager = UserManager(db)
     expense_manager = ExpenseManager(db)
-    #balance_calculator = BalanceCalculator(db)
-    #report_generator = ReportGenerator()
+    balance_manager = BalanceManager(db)
+    report_generator = ReportGeneration(db)
 
     print("\n--- Welcome to Expense Tracker :) ---")
-
     while True:
         print("\nPlease choose an option:")
         print("1. Add a new user")
@@ -96,7 +102,10 @@ def main():
         print("7. Generate a report")
         print("8. Visualize balances")
         print("9. Settle debts")
-        print("10. Exit")
+        print("10. Generate a report")
+        print("11. Show user debts")
+        print("12. Calculate debts")
+        print("13. Exit")
 
         choice = input("Enter your choice (1-10): \n").strip()
 
@@ -109,27 +118,31 @@ def main():
         elif choice == "4":
             list_expenses(expense_manager)
         elif choice == "5":
-            pass
-            show_balances(balance_calculator)
+            show_balances(balance_manager)
+            bal = db.cursor.execute("SELECT * FROM balances").fetchall()
+            print("Balances:", bal )
         elif choice == "6":
-            pass
-            simplify_debts(balance_calculator)
+            simplify_debts(balance_manager)
+            debt = db.cursor.execute("SELECT * FROM debts").fetchall()
+            print("Simplified Debts:", debt)
         elif choice == "7":
-            pass
-            #generate_report(report_generator, balance_calculator)
+            generate_report(report_generator,balance_manager)
         elif choice == "8":
-            pass
-            #visualize_balances(report_generator, balance_calculator)
+            visualize_balances(report_generator, balance_manager)
         elif choice == "9":
-            pass
             settle_debts(expense_manager)
         elif choice == "10":
+            generate_report(report_generator,balance_manager)
+        elif choice == "11":
+            user = input("Enter the name of the user to view debts: ")
+            balance_manager.get_user_debts(user)
+        elif choice == "12":
+            balance_manager.calculate_debts()
+        elif choice == "13":
             print("\n--- Thank you for using Expense Tracker! Goodbye! ---")
             break
         else:
             print("Invalid choice. Please try again.")
-
-    # Close the database connection
     db.close()
 
 if __name__ == "__main__":
