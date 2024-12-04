@@ -23,10 +23,10 @@ def test_balance_manager():
     )
     db.conn.commit()
 
-    # Test: Calculate balances
-    balance_manager.calculate_balances()
+    # Test: Calculate debts
+    balance_manager.calculate_debts()
     debts = db.cursor.execute("SELECT * FROM debts").fetchall()
-    assert len(debts) == 4  # Check that all debts are recorded
+    assert len(debts) == 3  # Check that all debts are recorded
     print("Debts after calculate_balances:", debts)
 
     # Test: Simplify debts

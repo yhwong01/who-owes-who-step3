@@ -40,9 +40,9 @@ class BalanceManager:
         self.db.cursor.execute("SELECT * FROM expenses")
 
         for expense in self.db.cursor.fetchall():
-            payer = expense["payer"]
-            amount = expense["amount"]
-            participants = expense["participants"].split(",")
+            payer = expense[1] # access payer
+            amount = expense[2] # access amount
+            participants = expense[3].split(",")
             share = amount / len(participants)
 
         for participant in participants:
