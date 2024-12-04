@@ -1,10 +1,40 @@
-#from expense_tracker.expense_management.db_management import *
-
 class BalanceManager:
     def __init__(self, db):
         self.db = db
     
     def calculate_balances(self):
+        # Fetch all expenses
+        self.db.cursor.execute("SELECT payer, amount, participants FROM expenses")
+        expenses = self.db.cursor.fetchall()
+
+        # Reset balances
+        self.db.cursor.execute("UPDATE balances SET balance = 0")
+
+        # Calculate balances
+        for payer, amount, participants in expenses:
+            participants_list = participants.split(",")
+            share = amount / len(participants_list)
+
+            # Update payer's balance
+            self.db.cursor.execute("""
+                INSERT INTO balances (user, balance) 
+                VALUES (?, ?) 
+                ON CONFLICT(user) DO UPDATE SET balance = balance + ?
+            """, (payer, amount - share * len(participants_list), amount - share * len(participants_list)))
+
+            # Update participants' balances
+            for participant in participants_list:
+                if participant != payer:
+                    self.db.cursor.execute("""
+                        INSERT INTO balances (user, balance) 
+                        VALUES (?, ?) 
+                        ON CONFLICT(user) DO UPDATE SET balance = balance - ?
+                    """, (participant, -share, share))
+
+        # Commit the changes
+        self.db.conn.commit()
+
+    def calculate_debts(self):
         """Calculate detailed debts between users."""
         self.db.cursor.execute("DELETE FROM debts")
         self.db.cursor.execute("SELECT * FROM expenses")
