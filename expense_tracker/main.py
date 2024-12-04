@@ -29,7 +29,12 @@ def list_expenses(expense_manager):
     for expense in expense_manager.list_expenses():
         print(f"- ID: {expense[0]}, Payer: {expense[1]}, Amount: {expense[2]}, Participants: {expense[3]}")
 
-def show_balances(balance_calculator):
+"""def show_balances(balance_calculator):
+    print("\nCurrent Balances: ")
+    balances = balance_calculator.calculate_balances()"""
+
+
+def show_debts(balance_calculator):
     print("\nCurrent Balances: ")
     balances = balance_calculator.calculate_balances()
 
@@ -39,7 +44,7 @@ def simplify_debts(balance_calculator):
 
 def generate_report(report_generator, balance_calculator):
     print("\nGenerating Report...")
-    balances = balance_calculator.calculate_balances()
+    #balances = balance_calculator.calculate_balances()
     format_choice = input("Enter report format ('text' or 'json'): ").strip().lower()
     if format_choice in ["text", "json"]:
         print(report_generator.generate_summary(format_choice))
@@ -54,10 +59,10 @@ def generate_report(report_generator, balance_calculator):
         print("Invalid format. Report generation canceled.")"""
     return
 
-def visualize_balances(report_generator, balance_calculator):
+def visualize_debts(report_generator, balance_calculator):
     print("\nVisualizing Balances...")
-    balances = balance_calculator.calculate_balances()
-    report_generator.visualize_debts(balances)
+    #balances = balance_calculator.calculate_balances()
+    report_generator.visualize_debts()
 
 def settle_debts(expense_manager):
     print("\n--- Settle a Debt ---")
@@ -100,7 +105,7 @@ def main():
         print("5. Show balances")
         print("6. Suggest debt simplifications")
         print("7. Generate a report")
-        print("8. Visualize balances")
+        print("8. Visualize debts")
         print("9. Settle debts")
         print("10. Generate a report")
         print("11. Show user debts")
@@ -118,7 +123,8 @@ def main():
         elif choice == "4":
             list_expenses(expense_manager)
         elif choice == "5":
-            show_balances(balance_manager)
+            pass
+            #show_debts(balance_manager)
             bal = db.cursor.execute("SELECT * FROM balances").fetchall()
             print("Balances:", bal )
         elif choice == "6":
@@ -128,7 +134,7 @@ def main():
         elif choice == "7":
             generate_report(report_generator,balance_manager)
         elif choice == "8":
-            visualize_balances(report_generator, balance_manager)
+            visualize_debts(report_generator, balance_manager)
         elif choice == "9":
             settle_debts(expense_manager)
         elif choice == "10":

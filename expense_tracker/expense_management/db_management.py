@@ -26,14 +26,14 @@ class DatabaseManager:
             )
         """)
 
-        # Balances table (tracks net balances)
-        self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS balances (
-                user TEXT PRIMARY KEY,
-                balance REAL NOT NULL DEFAULT 0,
-                FOREIGN KEY (user) REFERENCES users(name)
-            )
-        """)
+        # Balances table (tracks net balances),removed
+        #self.cursor.execute("""
+        #    CREATE TABLE IF NOT EXISTS balances (
+        #        user TEXT PRIMARY KEY,
+        #        balance REAL NOT NULL DEFAULT 0,
+        #        FOREIGN KEY (user) REFERENCES users(name)
+        #    )
+        #""")
 
         # Calculate and store the detailed debts between specific creditors and debtors for all recorded expenses
         self.cursor.execute("""
