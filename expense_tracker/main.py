@@ -112,7 +112,7 @@ def main():
         print("12. Calculate debts")
         print("13. Exit")
 
-        choice = input("Enter your choice (1-10): \n").strip()
+        choice = input("Enter your choice (1-13): \n").strip()
 
         if choice == "1":
             add_user(user_manager)
