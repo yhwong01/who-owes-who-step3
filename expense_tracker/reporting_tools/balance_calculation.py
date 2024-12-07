@@ -138,6 +138,26 @@ class BalanceManager:
 
         return
 
+    def update_negative_debts(self):
+        """Interchange the creditor and debtor if the debt amount is negative."""
+        neg_debt = self.db.cursor.execute(
+            "SELECT creditor,debtor,amount FROM debts WHERE amount < 0"
+        ).fetchall()
+
+        if neg_debt:
+            print("### Amounts Owed to You (Creditors):",)
+            for creditor,debtor,amount in neg_debt:
+                print(creditor,debtor,amount)
+                self.db.cursor.execute("INSERT INTO debts (creditor, debtor, amount) VALUES (?, ?, ?)", (debtor, creditor, amount*-1))
+                self.db.conn.commit()
+                self.db.cursor.execute("delete from debts where creditor = ? and debtor = ?", (creditor,debtor,))
+                self.db.conn.commit()
+
+            print("\n### Converted negative debts successfully")
+        else:
+            print("### No negative debts found")
+        return
+
 
 
 

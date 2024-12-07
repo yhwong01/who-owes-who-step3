@@ -149,6 +149,7 @@ def main():
             break
         else:
             print("Invalid choice. Please try again.")
+        balance_manager.update_negative_debts()
     db.close()
 
 if __name__ == "__main__":
