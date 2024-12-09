@@ -37,8 +37,15 @@ class TestExpenseManager(unittest.TestCase):
         self.manager.add_expense("Bob", 100, ["Alice", "Bob","Peter"])
         self.assertEqual(len(self.manager.list_expenses()), 2)
         result = self.manager.remove_expense(1)
+
         self.assertIn("removed", result)
+        self.assertIn("ID 1", result)
         self.assertEqual(len(self.manager.list_expenses()), 1)
+
+        #remove non exist expense
+        res = self.manager.remove_expense(-1)
+        self.assertEqual(res,"Expense with ID -1 does not exist.")
+
 
     def test_list_expenses(self):
         self.manager.add_expense("Alice", 100, ["Alice", "Bob"])
@@ -47,8 +54,11 @@ class TestExpenseManager(unittest.TestCase):
         self.assertEqual(len(expenses), 2)
         self.assertEqual(expenses[0][1], "Alice")
         self.assertEqual(expenses[1][1], "Bob")
-        self.assertIn("Alice", expenses[0][2])
-        self.assertIn("Charlie", expenses[1][2])
+        #print(expenses)
+
+        #test whether member in participants
+        self.assertIn("Alice", expenses[0][3])
+        self.assertIn("Charlie", expenses[1][3])
 
     def test_settle_debt(self):
         self.cursor.execute("INSERT INTO debts (creditor, debtor, amount) VALUES (?, ?, ?)", ("Alice", "Bob", 50))
@@ -67,8 +77,13 @@ class TestExpenseManager(unittest.TestCase):
         charlie_debt = self.cursor.fetchone()[0]
         self.assertEqual(charlie_debt, 30)
 
+        #negative amount
         with self.assertRaises(ValueError):
             self.manager.settle_debt("Bob", "Alice", -10)
 
+        #no such record in debts
         with self.assertRaises(Exception):
-            self.manager.settle_debt("Dave", "Alice", 50)
+            self.manager.settle_debt("David", "Alice", 50)
+
+if __name__=='__main__':
+    unittest.main()
