@@ -26,7 +26,6 @@ class ReportGeneration:
 
         # Generate the summary
         if format == "text":
-            print("hi")
             summary = f"Expense Report (Generated on {datetime.now()}):\n"
             summary += "\nExpense Details:\n"
             for expense in expenses:
