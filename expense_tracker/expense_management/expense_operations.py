@@ -1,7 +1,7 @@
 import sqlite3
 class Manager:
-    def __init__(self,name):
-        self.name = "Manager"
+    def __init__(self,name= "Manager"):
+        self.name = name
 
     def __str__(self):
         return self.name
@@ -50,7 +50,10 @@ class ExpenseManager(Manager):
         try:
             #self.db.cursor.execute("UPDATE balances SET balance = balance + ? WHERE user = ?", (amount, receiver))
             #self.db.cursor.execute("UPDATE balances SET balance = balance - ? WHERE user = ?", (amount, payer))
-
+            self.db.cursor.execute("select * from debts where creditor = ? and debtor = ?",(receiver, payer))
+            if_exist_users = self.db.cursor.fetchone()
+            if not if_exist_users:
+                raise ValueError("receiver or payer does not exist.")
             self.db.cursor.execute("UPDATE debts SET amount = amount - ? where creditor = ? and debtor = ?",
             (amount,receiver,payer))
             # Commit changes
