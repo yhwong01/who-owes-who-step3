@@ -3,7 +3,7 @@ from expense_management.user_management import UserManager
 from expense_management.expense_operations import ExpenseManager
 
 from reporting_tools.balance_calculation import BalanceManager
-from reporting_tools.report_generation import ReportGeneration
+from expense_tracker.reporting_tools.report_generation import ReportGeneration
 
 def add_user(user_manager):
     name = input("Enter the name of the user to add: ").strip()
