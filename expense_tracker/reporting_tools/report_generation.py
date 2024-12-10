@@ -26,6 +26,7 @@ class ReportGeneration:
 
         # Generate the summary
         if format == "text":
+            print("hi")
             summary = f"Expense Report (Generated on {datetime.now()}):\n"
             summary += "\nExpense Details:\n"
             for expense in expenses:
@@ -89,19 +90,22 @@ class ReportGeneration:
         # Bar chart
         debtors = list(debtor_totals.keys())
         amounts = list(debtor_totals.values())
-        plt.bar(debtors, amounts, color="skyblue")
-        plt.title("Debts per Debtor")
-        plt.xlabel("Debtor")
-        plt.ylabel("Total Amount Owed")
-        plt.xticks(rotation=45, ha="right")
+
+        plt.figure(figsize=(10, 6))  # Increase the figure size
+        plt.bar(debtors, amounts, color="skyblue", edgecolor="black")
+        plt.title("Debts per Debtor", fontsize=14)
+        plt.xlabel("Debtor", fontsize=12)
+        plt.ylabel("Total Amount Owed", fontsize=12)
+        plt.xticks(rotation=45, ha="right", fontsize=10)
         plt.tight_layout()
         if save_to_file:
             plt.savefig("debts_bar_chart.png")
         plt.show()
 
         # Pie chart
-        plt.pie(amounts, labels=debtors, autopct="%1.1f%%", startangle=90)
-        plt.title("Debt Distribution")
+        plt.figure(figsize=(8, 8))
+        plt.pie(amounts, labels=debtors, autopct="%1.1f%%", startangle=90, textprops={'fontsize': 10})
+        plt.title("Debt Distribution", fontsize=14)
         plt.axis("equal")
         if save_to_file:
             plt.savefig("debts_pie_chart.png")
