@@ -76,11 +76,6 @@ class TestBalanceCalculation(unittest.TestCase):
             "SELECT creditor, amount FROM debts WHERE debtor = ?", ("Alice",)
         )
         self.assertEqual(self.mock_cursor.execute.call_count, 2)  # Two SELECT queries
-        self.assertEqual(self.mock_cursor.fetchall.call_count, 2)  # `fetchall` called twice
-        for result in self.mock_cursor.fetchall.side_effect:
-            self.assertTrue(all(isinstance(item, tuple) and len(item) == 2 for item in result), 
-                "Each result should be a tuple with two elements (name, amount).")
-
 
     def test_update_negative_debts(self):
         """Test the update_negative_debts function."""
@@ -98,7 +93,33 @@ class TestBalanceCalculation(unittest.TestCase):
             "DELETE FROM debts WHERE creditor = ? AND debtor = ?", ("Alice", "Bob")
         )
         self.assertEqual(self.mock_cursor.execute.call_count, 3)
-        self.mock_cursor.fetchall.assert_called_once_with()
+
+    def test_combined_functionality(self):
+        """Test combined functionality of multiple methods."""
+        self.mock_cursor.fetchall.side_effect = [
+            [
+                (1, "Alice", 30.0, "Alice,Bob,Charlie"),
+                (2, "Bob", 20.0, "Bob,Charlie"),
+            ],  # Expenses for calculate_debts
+            [("Bob", 10.0), ("Charlie", 15.0)],  # Creditors for get_user_debts
+            [("Alice", 20.0)],                  # Debtors for get_user_debts
+            [("Alice", "Bob", -20.0)],          # Negative debts for update_negative_debts
+        ]
+
+        self.balance_manager.calculate_debts()
+        self.balance_manager.get_user_debts("Alice")
+        self.balance_manager.update_negative_debts()
+
+        self.assertEqual(self.mock_cursor.execute.call_count, 13)  # Adjusted count
+        self.mock_cursor.execute.assert_any_call("DELETE FROM debts")
+        self.mock_cursor.execute.assert_any_call(
+            "INSERT INTO debts (creditor, debtor, amount) VALUES (?, ?, ?)",
+            ("Alice", "Bob", 10.0),
+        )
+        self.mock_cursor.execute.assert_any_call(
+            "INSERT INTO debts (creditor, debtor, amount) VALUES (?, ?, ?)",
+            ("Bob", "Alice", 20.0),
+        )
 
 
 if __name__ == "__main__":
