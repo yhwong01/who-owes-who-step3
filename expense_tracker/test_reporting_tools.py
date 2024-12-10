@@ -18,7 +18,13 @@ db.cursor.executemany(
     [
         ("Alice", 30, "Alice,Bob,Charlie"),  # Alice pays 30, split with Bob and Charlie
         ("Bob", 20, "Bob,Charlie"),          # Bob pays 20, split with Charlie
-        ("Bob", 5, "Alice,Bob")              # Check for update on existing debt relationship
+        ("Bob", 5, "Alice,Bob"),              # Check for update on existing debt relationship
+        ("Charlie", 25, "Alice,Charlie"),    # New: Charlie pays 25, split with Alice
+        ("Alice", 15, "Alice,Bob"),          # New: Alice pays 15, split with Bob
+        ("Charlie", 20, "Bob,Charlie"),      # New: Charlie pays 20, split with Bob
+        ("Bob", 30, "Alice,Charlie"),        # New: Bob pays 30, split with Alice and Charlie
+        ("Alice", 40, "Bob,Charlie"),        # New: Alice pays 40, split with Bob and Charlie
+        ("Charlie", 50, "Alice,Bob")         # New: Charlie pays 50, split with Alice and Bob
     ],
 )
 db.conn.commit()
@@ -32,28 +38,10 @@ debts = db.cursor.execute("SELECT * FROM debts").fetchall()
 assert len(debts) == 3  # Check that all debts are recorded
 print(debts)
 
-"""
-    # Test: Simplify debts
-    balance_manager.simplify_debts()
-    simplified_debts = db.cursor.execute("SELECT * FROM debts").fetchall()
-    print("Debts after cal_debts:", simplified_debts)
-
-    balance_manager.simplify_debts()
-    simplified_debts = db.cursor.execute("SELECT * FROM debts").fetchall()
-    print("Debts after cal_debts:", simplified_debts)
-
-    # Test: Get user debts
-    alice_debts = balance_manager.get_user_debts("Alice")
-    print("Alice's debts:", alice_debts)
-
-    bob_debts = balance_manager.get_user_debts("Bob")
-    print("Bob's debts:", bob_debts)
-
-    # Cleanup
-    db.close()
-"""
-
-    # Test: Get user debts
+# Test: update negative debts
+balance_manager.update_negative_debts()
+new_debts = db.cursor.execute("SELECT * FROM debts").fetchall()
+print(new_debts)
 
 # Test: get_user_debts
 alice_debts = balance_manager.get_user_debts("Alice")
@@ -61,3 +49,4 @@ alice_debts
 
 bob_debts = balance_manager.get_user_debts("Bob")
 bob_debts
+

@@ -45,55 +45,54 @@ class BalanceManager:
         self.db.conn.commit()
 
 
-    def simplify_debts(self):
-        """
-        Suggest debt simplifications where transfers can happen between users who already have a debt relationship.
+    # def simplify_debts(self):
+    #     """
+    #     Suggest debt simplifications where transfers can happen between users who already have a debt relationship.
 
-        Returns:
-            list: A list of suggested transactions.
-                Format: [(debtor, creditor, amount), ...]
-        """
-        # Fetch all debts from the database
-        debts = self.db.cursor.execute(
-            "SELECT creditor, debtor, amount FROM debts"
-        ).fetchall()
+    #     Returns:
+    #         list: Human-readable suggestions for debt transfers and instructions for unresolved relationships.
+    #     """
+    #     # Fetch all debts from the database
+    #     debts = self.db.cursor.execute(
+    #         "SELECT creditor, debtor, amount FROM debts"
+    #     ).fetchall()
 
-        # Build a debt map to track relationships
-        debt_map = {}  # {debtor: {creditor: amount}}
-        for creditor, debtor, amount in debts:
-            debt_map.setdefault(debtor, {})[creditor] = amount
+    #     # Build a debt map to track relationships
+    #     debt_map = {}  # {debtor: {creditor: amount}}
+    #     for creditor, debtor, amount in debts:
+    #         debt_map.setdefault(debtor, {})[creditor] = amount
 
-        # Prepare suggestions for simplification
-        suggestions = []
+    #     # Prepare suggestions for simplification
+    #     suggestions = []
 
-        # Iterate through each debtor and their creditors
-        for debtor, creditors in debt_map.items():
-            for creditor, amount in creditors.items():
-                # Check if the creditor also owes someone
-                if creditor in debt_map:
-                    for next_creditor, next_amount in debt_map[creditor].items():
-                        # Suggest a transfer if there's a known relationship
-                        if next_creditor == debtor or next_creditor in creditors:
-                            suggested_amount = min(amount, next_amount)
-                            suggestions.append((creditor, next_creditor, suggested_amount))
+    #     # Iterate through each debtor and their creditors
+    #     for debtor, creditors in debt_map.items():
+    #         for creditor, amount in creditors.items():
+    #             # Check if the creditor also owes someone
+    #             if creditor in debt_map:
+    #                 for next_creditor, next_amount in debt_map[creditor].items():
+    #                     # Suggest a transfer if there's a known relationship
+    #                     if next_creditor == debtor or next_creditor in creditors:
+    #                         suggested_amount = min(amount, next_amount)
+    #                         suggestions.append((creditor, next_creditor, suggested_amount))
 
-        # Remove duplicate suggestions and sort them
-        unique_suggestions = list({(debtor, creditor, round(amount, 2)) for debtor, creditor, amount in suggestions})
-        unique_suggestions.sort(key=lambda x: (x[0], x[1]))
+    #     # Create human-readable output
+    #     readable_suggestions = []
+    #     for debtor, creditor, amount in suggestions:
+    #         readable_suggestions.append(
+    #             f"{debtor} should directly transfer ${amount:.2f} to {creditor} to simplify debts."
+    #         )
 
-        return unique_suggestions
+    #     # Provide instructions for unresolved relationships
+    #     unresolved = []
+    #     for creditor, debtor, amount in debts:
+    #         if (creditor, debtor, amount) not in suggestions:
+    #             unresolved.append(
+    #                 f"No simplification possible for {debtor} owing ${amount:.2f} to {creditor}. Please settle this directly."
+    #             )
 
+    #     return {"simplifications": readable_suggestions, "instructions": unresolved}
 
-        # Update the debts table with simplified values
-        self.db.cursor.execute("DELETE FROM debts")  # Clear old debts
-        for debtor, creditor, amount in simplified_transactions:
-            self.db.cursor.execute(
-                "INSERT INTO debts (creditor, debtor, amount) VALUES (?, ?, ?)",
-                (creditor, debtor, amount)
-            )
-        self.db.conn.commit()
-
-        return simplified_transactions
 
 
     def get_user_debts(self, user):
@@ -145,8 +144,4 @@ class BalanceManager:
         else:
             print("### No negative debts found")
         return
-
-
-
-
 
