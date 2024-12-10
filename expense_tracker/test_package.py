@@ -2,7 +2,7 @@ from expense_management.db_management import DatabaseManager
 from expense_management.user_management import UserManager
 from expense_management.expense_operations import ExpenseManager
 from reporting_tools.balance_calculation import BalanceManager
-from reporting_tools.report_generation import ReportGeneration
+from expense_tracker.reporting_tools.report_generation import ReportGeneration
 
 # Initialize the database and managers
 db = DatabaseManager("expense_tracker.db")

@@ -1,111 +1,174 @@
-import matplotlib.pyplot as plt
-import os
+import csv
 from datetime import datetime
-from expense_tracker.expense_management.db_management import DatabaseManager
+import pandas as pd
+import matplotlib.pyplot as plt
 
 class ReportGeneration:
     def __init__(self, db):
         self.db = db
 
-    def generate_summary(self, format="text"):
+    def generate_summary(self, user):
         """
-        Generate a summary of expenses and debts in text or JSON format.
+        Generate a well-formatted text summary of the user's expense history and debt situation.
 
         Parameters:
-            format (str): The desired format ("text" or "json").
+            user (str): The username for which the summary is generated.
 
         Returns:
-            str or dict: The formatted summary.
+            str: The formatted summary as a string.
         """
-        # Fetch expenses and debts from the database
-        self.db.cursor.execute("SELECT * FROM expenses")
+        # Fetch all expenses involving the user
+        self.db.cursor.execute(
+            "SELECT * FROM expenses WHERE payer = ? OR participants LIKE ?", (user, f"%{user}%")
+        )
         expenses = self.db.cursor.fetchall()
 
-        self.db.cursor.execute("SELECT debtor, creditor, amount FROM debts")
+        # Fetch all debts involving the user
+        self.db.cursor.execute(
+            """
+            SELECT debtor, creditor, amount
+            FROM debts
+            WHERE debtor = ? OR creditor = ?
+            """,
+            (user, user),
+        )
         debts = self.db.cursor.fetchall()
 
-        # Generate the summary
-        if format == "text":
-            summary = f"Expense Report (Generated on {datetime.now()}):\n"
-            summary += "\nExpense Details:\n"
-            for expense in expenses:
-                summary += f"- Payer: {expense[1]}, Amount: {expense[2]:.2f}, Participants: {expense[3]}\n"
-            summary += "\nDebt Details:\n"
-            for debt in debts:
-                summary += f"- Debtor: {debt[0]}, Creditor: {debt[1]}, Amount: {debt[2]:.2f}\n"
-            return summary
-        elif format == "json":
-            summary = {
-                "timestamp": datetime.now().isoformat(),
-                "expenses": [{"payer": e[1], "amount": e[2], "participants": e[3]} for e in expenses],
-                "debts": [{"debtor": d[0], "creditor": d[1], "amount": d[2]} for d in debts],
-            }
-            return summary
-        else:
-            raise ValueError("Invalid format. Choose 'text' or 'json'.")
+        # Generate the well-formatted summary
+        summary = f"### Expense Report for {user} (Generated on {datetime.now()}):\n"
 
-    def export_report(self, file_format="txt"):
+        # Add user's expense history
+        summary += "\n**Expense History:**\n"
+        if expenses:
+            for expense in expenses:
+                payer = expense[1]
+                amount = expense[2]
+                participants = expense[3]
+                summary += f"- Payer: {payer}, Amount: ${amount:.2f}, Participants: {participants}\n"
+        else:
+            summary += "- No expense history found.\n"
+
+        # Add user's debt situation
+        summary += "\n**Debt Situation:**\n"
+        total_credit = 0
+        total_debt = 0
+        if debts:
+            for debtor, creditor, amount in debts:
+                if debtor == user:
+                    summary += f"- You owe {creditor}: ${amount:.2f}\n"
+                    total_debt += amount
+                elif creditor == user:
+                    summary += f"- {debtor} owes you: ${amount:.2f}\n"
+                    total_credit += amount
+        else:
+            summary += "- No debt records found.\n"
+
+        # Add totals
+        summary += f"\n**Summary:**\n"
+        summary += f"- Total Amount You Owe: ${total_debt:.2f}\n"
+        summary += f"- Total Amount Owed to You: ${total_credit:.2f}\n"
+
+        return summary
+
+
+    def export_report(self, user, file_format="txt"):
         """
-        Export the summary report to a file.
+        Export the summary report for a specific user to a file.
 
         Parameters:
-            file_format (str): File format ("txt", "csv", or "xlsx").
+            user (str): The username for which the report is generated.
+            file_format (str): File format to export ("txt", "csv", or "xlsx").
         """
-        summary = self.generate_summary(format="text" if file_format == "txt" else "json")
-        file_name = f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        # Generate the summary
+        summary_text = self.generate_summary(user)
+
+        # Define the file name based on the user and timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        file_name = f"{user}_expense_report_{timestamp}"
 
         if file_format == "txt":
+            # Export as a text file
             with open(f"{file_name}.txt", "w") as file:
-                file.write(summary)
+                file.write(summary_text)
         elif file_format == "csv":
-            import csv
+            # Extract debts from the database
+            debts = [
+                {"Debtor": debt[0], "Creditor": debt[1], "Amount": debt[2]}
+                for debt in self.db.cursor.execute(
+                    "SELECT debtor, creditor, amount FROM debts WHERE debtor = ? OR creditor = ?",
+                    (user, user),
+                ).fetchall()
+            ]
+            
+            # Write debts to a CSV file
             with open(f"{file_name}.csv", "w", newline="") as file:
-                writer = csv.writer(file)
-                writer.writerow(["Debtor", "Creditor", "Amount"])
-                for debt in summary["debts"]:
-                    writer.writerow([debt["debtor"], debt["creditor"], debt["amount"]])
+                writer = csv.DictWriter(file, fieldnames=["Debtor", "Creditor", "Amount"])
+                writer.writeheader()
+                writer.writerows(debts)
         elif file_format == "xlsx":
-            import pandas as pd
-            df = pd.DataFrame(summary["debts"])
+            # Extract debts for Excel export
+            debts = [
+                {"Debtor": debt[0], "Creditor": debt[1], "Amount": debt[2]}
+                for debt in self.db.cursor.execute(
+                    "SELECT debtor, creditor, amount FROM debts WHERE debtor = ? OR creditor = ?",
+                    (user, user),
+                ).fetchall()
+            ]
+
+            # Write debts to an Excel file
+            df = pd.DataFrame(debts)
             df.to_excel(f"{file_name}.xlsx", index=False)
         else:
-            raise ValueError("Invalid format. Choose 'txt', 'csv', or 'xlsx'.")
+            raise ValueError("Invalid file format. Choose 'txt', 'csv', or 'xlsx'.")
 
-    def visualize_debts(self, save_to_file=False):
+
+
+    def visualize_balances(self, user):
         """
-        Visualize debts using bar and pie charts.
+        Create a pie chart summarizing:
+        - Total amount the user owes (negative balances).
+        - Total amount owed to the user (positive balances).
 
         Parameters:
-            save_to_file (bool): Whether to save the charts as files.
+            user (str): The username for whom to generate the visualization.
         """
-        self.db.cursor.execute("SELECT debtor, creditor, amount FROM debts")
-        debts = self.db.cursor.fetchall()
+        # Fetch data for debts owed to the user (creditors) and debts the user owes (debtors)
+        creditors = self.db.cursor.execute(
+            "SELECT debtor, amount FROM debts WHERE creditor = ?", (user,)
+        ).fetchall()
 
-        # Aggregate debts by debtor for visualization
-        debtor_totals = {}
-        for debt in debts:
-            debtor_totals[debt[0]] = debtor_totals.get(debt[0], 0) + debt[2]
+        debtors = self.db.cursor.execute(
+            "SELECT creditor, amount FROM debts WHERE debtor = ?", (user,)
+        ).fetchall()
 
-        # Bar chart
-        debtors = list(debtor_totals.keys())
-        amounts = list(debtor_totals.values())
+        # Calculate totals
+        total_owed_to_user = sum(row[1] for row in creditors)
+        total_user_owes = sum(row[1] for row in debtors)
 
-        plt.figure(figsize=(10, 6))  # Increase the figure size
-        plt.bar(debtors, amounts, color="skyblue", edgecolor="black")
-        plt.title("Debts per Debtor", fontsize=14)
-        plt.xlabel("Debtor", fontsize=12)
-        plt.ylabel("Total Amount Owed", fontsize=12)
-        plt.xticks(rotation=45, ha="right", fontsize=10)
+        # Handle the case where both totals are 0
+        if total_owed_to_user == 0 and total_user_owes == 0:
+            print(f"No debts found for {user}.")
+            return
+
+        # Prepare data for the chart
+        labels = ["Owed to You", "You Owe"]
+        sizes = [total_owed_to_user, total_user_owes]  # Positive amounts for both
+        colors = ["#76c7c0", "#ff6f61"]
+
+        # Create the pie chart
+        plt.figure(figsize=(6, 6))
+        plt.pie(
+            sizes,
+            labels=labels,
+            autopct=lambda p: f"${p * sum(sizes) / 100:.2f}",
+            startangle=90,
+            colors=colors,
+            wedgeprops={"edgecolor": "black"},
+        )
+        plt.title(f"Debt Summary for {user}", fontsize=16)
+        plt.axis("equal")  # Ensure the pie is a circle
         plt.tight_layout()
-        if save_to_file:
-            plt.savefig("debts_bar_chart.png")
+
+        # Show the chart
         plt.show()
 
-        # Pie chart
-        plt.figure(figsize=(8, 8))
-        plt.pie(amounts, labels=debtors, autopct="%1.1f%%", startangle=90, textprops={'fontsize': 10})
-        plt.title("Debt Distribution", fontsize=14)
-        plt.axis("equal")
-        if save_to_file:
-            plt.savefig("debts_pie_chart.png")
-        plt.show()
