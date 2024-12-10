@@ -13,7 +13,6 @@ class BalanceManager:
             amount = expense[2] # access amount
             participants = expense[3].split(",")
             share = amount / len(participants)
-            print(payer,amount,participants)
 
             for participant in participants:
                 if participant != payer:
@@ -48,44 +47,42 @@ class BalanceManager:
 
     def simplify_debts(self):
         """
-        Simplify debt relationships to minimize transactions.
+        Suggest debt simplifications where transfers can happen between users who already have a debt relationship.
+
+        Returns:
+            list: A list of suggested transactions.
+                Format: [(debtor, creditor, amount), ...]
         """
-        debts = self.db.cursor.execute("SELECT creditor, debtor, amount FROM debts").fetchall()
-        debt_map = {}  # {creditor: {debtor: amount}}
+        # Fetch all debts from the database
+        debts = self.db.cursor.execute(
+            "SELECT creditor, debtor, amount FROM debts"
+        ).fetchall()
 
-        # Build a debt map from the existing debts
-        for debt in debts:
-            creditor, debtor, amount = debt[1], debt[2], debt[3]
-            debt_map.setdefault(creditor, {}).setdefault(debtor, 0)
-            debt_map[creditor][debtor] += amount
+        # Build a debt map to track relationships
+        debt_map = {}  # {debtor: {creditor: amount}}
+        for creditor, debtor, amount in debts:
+            debt_map.setdefault(debtor, {})[creditor] = amount
 
-        # Create a net balance map from the debt map
-        net_balances = {}  # {person: net_balance}
-        for creditor, relations in debt_map.items():
-            for debtor, amount in relations.items():
-                net_balances[creditor] = net_balances.get(creditor, 0) + amount
-                net_balances[debtor] = net_balances.get(debtor, 0) - amount
+        # Prepare suggestions for simplification
+        suggestions = []
 
-        # Separate people into creditors and debtors
-        creditors = [(person, balance) for person, balance in net_balances.items() if balance > 0]
-        debtors = [(person, -balance) for person, balance in net_balances.items() if balance < 0]
+        # Iterate through each debtor and their creditors
+        for debtor, creditors in debt_map.items():
+            for creditor, amount in creditors.items():
+                # Check if the creditor also owes someone
+                if creditor in debt_map:
+                    for next_creditor, next_amount in debt_map[creditor].items():
+                        # Suggest a transfer if there's a known relationship
+                        if next_creditor == debtor or next_creditor in creditors:
+                            suggested_amount = min(amount, next_amount)
+                            suggestions.append((creditor, next_creditor, suggested_amount))
 
-        # Simplify transactions
-        simplified_transactions = []
-        while creditors and debtors:
-            creditor, credit_amount = creditors.pop(0)
-            debtor, debt_amount = debtors.pop(0)
+        # Remove duplicate suggestions and sort them
+        unique_suggestions = list({(debtor, creditor, round(amount, 2)) for debtor, creditor, amount in suggestions})
+        unique_suggestions.sort(key=lambda x: (x[0], x[1]))
 
-            settled_amount = min(credit_amount, debt_amount)
-            simplified_transactions.append((debtor, creditor, settled_amount))
+        return unique_suggestions
 
-            credit_remaining = credit_amount - settled_amount
-            debt_remaining = debt_amount - settled_amount
-
-            if credit_remaining > 0:
-                creditors.insert(0, (creditor, credit_remaining))
-            if debt_remaining > 0:
-                debtors.insert(0, (debtor, debt_remaining))
 
         # Update the debts table with simplified values
         self.db.cursor.execute("DELETE FROM debts")  # Clear old debts
@@ -108,19 +105,24 @@ class BalanceManager:
         debtors = self.db.cursor.execute(
             "SELECT creditor, amount FROM debts WHERE debtor = ?", (user,)
         ).fetchall()
+
         if creditors:
-            print("### Amounts Owed to You (Creditors):")
+            total_credit = sum(amount for _, amount in creditors)
+            print("### Amounts Owed to You:")
             for debtor, amount in creditors:
                 print(f"- {debtor} owes you: ${amount:.2f}")
+            print(f"\n💰Total Amount Owed to You: ${total_credit:.2f}")
         else:
-            print("### Amounts Owed to You (Creditors): None")
+            print("### Amounts Owed to You: No one owes you money.")
 
         if debtors:
-            print("\n### Amounts You Owe (Debtors):")
+            total_debt = sum(amount for _, amount in debtors)
+            print("\n### Amounts You Owe:")
             for creditor, amount in debtors:
                 print(f"- You owe {creditor}: ${amount:.2f}")
+            print(f"\n💰Total Amount You Owe: ${total_debt:.2f}")
         else:
-            print("\n### Amounts You Owe (Debtors): None")
+            print("\n### Amounts You Owe: You don’t owe anyone money.\n")
 
         return
 
