@@ -14,6 +14,8 @@ sys.path.append(TEST_DIR)
 from expense_management.test_expense_manager import TestExpenseManager
 from expense_management.test_manager import TestManager
 from expense_management.test_user_manager import TestUserManager
+from reporting_tools.test_balance_calculation import TestBalanceCalculation
+from reporting_tools.test_report_generation import TestReportGeneration
 
 
 def suite():
@@ -31,8 +33,16 @@ def suite():
     suite.addTest(TestUserManager('test_remove_user'))
     suite.addTest(TestUserManager('test_list_users'))
 
-    #add your code here
+    # Add tests from TestBalanceCalculation
+    suite.addTest(TestBalanceCalculation('test_calculate_debts'))
+    suite.addTest(TestBalanceCalculation('test_get_user_debts'))
+    suite.addTest(TestBalanceCalculation('test_update_negative_debts'))
+    suite.addTest(TestBalanceCalculation('test_combined_functionality'))
 
+    # Add tests from TestReportGeneration
+    suite.addTest(TestReportGeneration('test_generate_summary'))
+    suite.addTest(TestReportGeneration('test_export_report'))
+    suite.addTest(TestReportGeneration('test_visualize_balances'))
 
     return suite
 
