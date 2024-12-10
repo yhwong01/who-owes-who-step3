@@ -3,6 +3,7 @@ class BalanceManager:
         self.db = db
 
     def calculate_debts(self):
+        #fixed bugs in SQL, now ensure unique (creditor, debtor) pairs in either (debtor, creditor) or (creditor, debtor)
         """Calculate detailed debts between users."""
         self.db.cursor.execute("DELETE FROM debts")
         self.db.cursor.execute("SELECT * FROM expenses")
@@ -16,16 +17,34 @@ class BalanceManager:
 
             for participant in participants:
                 if participant != payer:
-                    self.db.cursor.execute(
-                        """
-                        INSERT INTO debts (creditor, debtor, amount)
-                        VALUES (?, ?, ?)
-                        ON CONFLICT(creditor, debtor) DO UPDATE SET amount = amount + ?""",
-                        (payer, participant, share, share)
-                    )
+                    # Check if an existing debt exist
+                    existing_debt = self.db.cursor.execute(
+                        "SELECT creditor, debtor, amount FROM debts WHERE (creditor = ? AND debtor = ?) OR (creditor = ? AND debtor = ?)",
+                        (payer, participant, participant, payer)
+                    ).fetchone()
 
-                    '''ON CONFLICT(creditor, debtor) DO UPDATE SET amount = amount + ?'''
+                    if existing_debt:
+                        creditor, debtor, amount = existing_debt
+                        if creditor == payer:
+                            # Update the existing record
+                            self.db.cursor.execute(
+                                "UPDATE debts SET amount = amount + ? WHERE creditor = ? AND debtor = ?",
+                                (share, payer, participant)
+                            )
+                        else:
+                            # Reverse the amount since the roles are reversed
+                            self.db.cursor.execute(
+                                "UPDATE debts SET amount = amount - ? WHERE creditor = ? AND debtor = ?",
+                                (share, participant, payer)
+                            )
+                    else:
+                        # No existing debt, insert a new debt relationship
+                        self.db.cursor.execute(
+                            "INSERT INTO debts (creditor, debtor, amount) VALUES (?, ?, ?)",
+                            (payer, participant, share)
+                        )
         self.db.conn.commit()
+
 
     def simplify_debts(self):
         """
@@ -89,19 +108,43 @@ class BalanceManager:
         debtors = self.db.cursor.execute(
             "SELECT creditor, amount FROM debts WHERE debtor = ?", (user,)
         ).fetchall()
-        print("creditors")
-        for item in creditors:
-            print(item)
+        if creditors:
+            print("### Amounts Owed to You (Creditors):")
+            for debtor, amount in creditors:
+                print(f"- {debtor} owes you: ${amount:.2f}")
+        else:
+            print("### Amounts Owed to You (Creditors): None")
 
-        print("debtors")
-        for item in debtors:
-            print(item)
-        '''result = {
-            "owed_by_others": [{"debtor": row["debtor"], "amount": row["amount"]} for row in creditors],
-            "owes_to_others": [{"creditor": row["creditor"], "amount": row["amount"]} for row in debtors],
-        }'''
-        #return result
+        if debtors:
+            print("\n### Amounts You Owe (Debtors):")
+            for creditor, amount in debtors:
+                print(f"- You owe {creditor}: ${amount:.2f}")
+        else:
+            print("\n### Amounts You Owe (Debtors): None")
+
         return
+
+    def update_negative_debts(self):
+        """Interchange the creditor and debtor if the debt amount is negative."""
+        neg_debt = self.db.cursor.execute(
+            "SELECT creditor,debtor,amount FROM debts WHERE amount < 0"
+        ).fetchall()
+
+        if neg_debt:
+            print("### Amounts Owed to You (Creditors):",)
+            for creditor,debtor,amount in neg_debt:
+                print(creditor,debtor,amount)
+                self.db.cursor.execute("INSERT INTO debts (creditor, debtor, amount) VALUES (?, ?, ?)", (debtor, creditor, amount*-1))
+                self.db.conn.commit()
+                self.db.cursor.execute("delete from debts where creditor = ? and debtor = ?", (creditor,debtor,))
+                self.db.conn.commit()
+
+            print("\n### Converted negative debts successfully")
+        else:
+            print("### No negative debts found")
+        return
+
+
 
 
 
