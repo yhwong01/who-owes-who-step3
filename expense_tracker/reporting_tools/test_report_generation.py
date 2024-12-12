@@ -103,9 +103,9 @@ class TestReportGeneration(unittest.TestCase):
         for file in txt_files + csv_files + xlsx_files:
             os.remove(file)
 
-        
+
         from expense_tracker.reporting_tools.balance_calculation import BalanceManager
-        from expense_tracker.reporting_tools.report_generation import ReportGeneration     
+        from expense_tracker.reporting_tools.report_generation import ReportGeneration
         from expense_tracker.expense_management.db_management import DatabaseManager
 
         db = DatabaseManager("expense_tracker.db")
@@ -142,7 +142,7 @@ class TestReportGeneration(unittest.TestCase):
 
         # Clean up generated files
         files_to_delete = [
-            filename for filename in os.listdir(".") 
+            filename for filename in os.listdir(".")
             if filename.startswith("Alice_expense_report") and filename.endswith((".txt", ".csv", ".xlsx"))
         ]
 
@@ -181,8 +181,6 @@ class TestReportGeneration(unittest.TestCase):
         plt.title(f"Debt Summary for {current_user}")
         plt.grid(axis='y', linestyle="--", alpha=0.7)
         plt.show()
-
-
 
     @classmethod
     def initialize_db(cls, db):
@@ -295,5 +293,6 @@ class TestReportGeneration(unittest.TestCase):
         report_gen.visualize_balances("Alice")
         print("After calling visualize_simple_debt_summary")
 
+        db.close()
 if __name__ == "__main__":
     unittest.main()
