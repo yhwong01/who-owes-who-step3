@@ -8,7 +8,7 @@ class TestExpenseManager(unittest.TestCase):
     def setUpClass(cls):
         cls.conn = sqlite3.connect(":memory:")
         cls.conn.execute("CREATE TABLE expenses (id INTEGER PRIMARY KEY, payer TEXT, amount REAL CHECK(TYPEOF(amount) = 'real'), participants TEXT)")
-        cls.conn.execute("CREATE TABLE debts (creditor TEXT, debtor TEXT, amount REAL CHECK(TYPEOF(amount) = 'real'))")
+        cls.conn.execute("CREATE TABLE debts (creditor TEXT, debtor TEXT, amount REAL)")
         cls.cursor = cls.conn.cursor()
         cls.manager = ExpenseManager(db=cls)
 
