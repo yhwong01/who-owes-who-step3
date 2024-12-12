@@ -10,6 +10,7 @@ def add_user(user_manager):
     bal = float(input("Enter initial balance of the user: "))
     result = user_manager.add_user(name,bal)
     print(result)
+    
 
 def add_expense(expense_manager):
     payer = input("Enter the name of the payer: ").strip()
