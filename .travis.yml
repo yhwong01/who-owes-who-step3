@@ -2,9 +2,7 @@ language: python
 
 # Define the Python versions you want to test
 python:
-  - "3.10"
-  - "3.11"
-  - "3.12"
+  - "3.9"
 
 # Install dependencies
 install:
