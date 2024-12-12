@@ -2,6 +2,12 @@ import unittest
 import sys
 import os
 
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(PROJECT_ROOT)
+
+# Add subdirectories to the Python path if necessary
+sys.path.append(os.path.join(PROJECT_ROOT, "expense_tracker"))
+
 PARENT_DIR = os.path.dirname(__file__)
 sys.path.append(PARENT_DIR)
 
