@@ -19,7 +19,7 @@ class UserManager:
     def remove_user(self, name):
         #added user defined exception
         try:
-            self.db.cursor.execute("select FROM users WHERE name = ?", (name,))
+            self.db.cursor.execute("select * FROM users WHERE name = ?", (name,))
             user = self.db.cursor.fetchone()
             if user is None:
                 raise UserNotFoundError()
