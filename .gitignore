@@ -10,3 +10,5 @@ __pycache__/
 
 #all pycache files
 *.py[cod]
+
+htmlcov/

@@ -7,7 +7,7 @@ class TestExpenseManager(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.conn = sqlite3.connect(":memory:")
-        cls.conn.execute("CREATE TABLE expenses (id INTEGER PRIMARY KEY, payer TEXT, amount REAL, participants TEXT)")
+        cls.conn.execute("CREATE TABLE expenses (id INTEGER PRIMARY KEY, payer TEXT, amount REAL , participants TEXT)")
         cls.conn.execute("CREATE TABLE debts (creditor TEXT, debtor TEXT, amount REAL)")
         cls.cursor = cls.conn.cursor()
         cls.manager = ExpenseManager(db=cls)
@@ -31,6 +31,19 @@ class TestExpenseManager(unittest.TestCase):
         self.assertEqual(len(self.manager.list_expenses()), 1)
         self.assertEqual(self.manager.list_expenses()[0][1], "Alice")
 
+        with self.assertRaises(TypeError):
+            self.manager.add_expense("Alice",10,[1,2])
+
+        with self.assertRaises(TypeError):
+            self.manager.add_expense("Alice","asd",["Alice", "Bob"])
+
+        with self.assertRaises(ValueError):
+            self.manager.add_expense("Alice", -100, ["Alice", "Bob"])
+
+        with self.assertRaises(Exception):
+            self.manager.add_expense(None,None,None)
+
+
     def test_remove_expense(self):
         self.manager.add_expense("Alice", 100, ["Alice", "Bob"])
         self.assertEqual(len(self.manager.list_expenses()), 1)
@@ -43,9 +56,15 @@ class TestExpenseManager(unittest.TestCase):
         self.assertEqual(len(self.manager.list_expenses()), 1)
 
         #remove non exist expense
-        res = self.manager.remove_expense(-1)
-        self.assertEqual(res,"Expense with ID -1 does not exist.")
+        #res = self.manager.remove_expense(-1)
+        #self.assertEqual(res,"Expense with ID -1 does not exist.")
 
+        # Remove a non-existent expense
+        #result = self.manager.remove_expense(99)
+        #self.assertEqual(result, "Expense with ID 99 does not exist.")
+
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.manager.remove_expense(-1)
 
     def test_list_expenses(self):
         self.manager.add_expense("Alice", 100, ["Alice", "Bob"])
@@ -59,6 +78,10 @@ class TestExpenseManager(unittest.TestCase):
         #test whether member in participants
         self.assertIn("Alice", expenses[0][3])
         self.assertIn("Charlie", expenses[1][3])
+
+        # Test no expenses
+        self.setUp()
+        self.assertEqual(len(self.manager.list_expenses()), 0)
 
     def test_settle_debt(self):
         self.cursor.execute("INSERT INTO debts (creditor, debtor, amount) VALUES (?, ?, ?)", ("Alice", "Bob", 50))
@@ -82,8 +105,19 @@ class TestExpenseManager(unittest.TestCase):
             self.manager.settle_debt("Bob", "Alice", -10)
 
         #no such record in debts
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             self.manager.settle_debt("David", "Alice", 50)
+
+        with self.assertRaises(TypeError):
+            self.manager.settle_debt("Bob", "Alice", "asd")
+
+        # Settle full debt
+        result = self.manager.settle_debt("Bob", "Alice", 30)
+        self.assertIsNone(result)
+        self.cursor.execute("SELECT amount FROM debts WHERE creditor = 'Alice' AND debtor = 'Bob'")
+        bob_debt = self.cursor.fetchone()
+        self.assertEqual(bob_debt[0],0)  # Debt should no longer exist
+
 
 if __name__=='__main__':
     unittest.main()

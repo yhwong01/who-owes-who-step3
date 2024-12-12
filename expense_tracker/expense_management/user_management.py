@@ -18,12 +18,11 @@ class UserManager:
 
     def remove_user(self, name):
         #added user defined exception
+        self.db.cursor.execute("select * FROM users WHERE name = ?", (name,))
+        user = self.db.cursor.fetchone()
+        if user is None:
+            raise UserNotFoundError()
         try:
-            self.db.cursor.execute("select * FROM users WHERE name = ?", (name,))
-            user = self.db.cursor.fetchone()
-            if user is None:
-                raise UserNotFoundError()
-
             self.db.cursor.execute("DELETE FROM users WHERE name = ?", (name,))
             #self.db.cursor.execute("DELETE FROM balances WHERE user = ?", (name,))
             self.db.conn.commit()

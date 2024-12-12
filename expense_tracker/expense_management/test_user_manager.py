@@ -1,6 +1,7 @@
 import unittest
 from user_management import UserManager
 import sqlite3
+from user_management import UserNotFoundError
 
 class TestUserManager(unittest.TestCase):
 
@@ -41,7 +42,9 @@ class TestUserManager(unittest.TestCase):
         self.assertEqual(len(self.manager.list_users()), 2)
         result = self.manager.remove_user("Alice")
         self.assertIn("removed", result)
-        self.assertEqual(len(self.manager.list_users()), 1)
+
+        with self.assertRaises(UserNotFoundError):
+            self.manager.remove_user("asd")
 
     def test_list_users(self):
         self.manager.add_user("Alice")

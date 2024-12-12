@@ -16,6 +16,13 @@ class ExpenseManager(Manager):
         participants_str = ",".join(participants) #each participants sperated by a comma
         # need keep track of the definition of participants
         # either the payer is involved or not for calculating balances
+        if not isinstance(participants, list) or not all(isinstance(p, str) for p in participants):
+            raise TypeError("Participants must be a list of strings.")
+
+        if not isinstance(amount, (float, int)):
+            raise TypeError("Amount must be a positive number.")
+        if amount <= 0:
+            raise ValueError("Amount must be a positive number.")
         try:
             # Insert expense
             self.db.cursor.execute("""
@@ -26,17 +33,9 @@ class ExpenseManager(Manager):
             self.db.conn.commit()
             return f"Expense of {amount} added for {payer}, split among {participants}."
 
-        except sqlite3.IntegrityError as ie:
-            self.db.conn.rollback()
-            print(f"IntegrityError: {ie}")
-
-        except sqlite3.OperationalError as oe:
-            self.db.conn.rollback()
-            print(f"OperationalError: {oe}")
 
         except Exception as e:
-            self.db.conn.rollback()
-            print(f"An unexpected error occurred: {e}")
+            raise Exception
 
 
     def list_expenses(self):
@@ -49,20 +48,16 @@ class ExpenseManager(Manager):
             self.db.cursor.execute("SELECT payer, amount, participants FROM expenses WHERE id = ?", (expense_id,))
             expense = self.db.cursor.fetchone()
             if not expense:
-                return f"Expense with ID {expense_id} does not exist."
+                raise sqlite3.IntegrityError("Expense not found")
 
             self.db.cursor.execute("DELETE FROM expenses WHERE id = ?", (expense_id,))
             self.db.conn.commit()
             return f"Expense with ID {expense_id} removed successfully."
 
-
         except sqlite3.IntegrityError as ie:
             self.db.conn.rollback()
             print(f"IntegrityError: {ie}")
-
-        except sqlite3.OperationalError as oe:
-            self.db.conn.rollback()
-            print(f"OperationalError: {oe}")
+            raise sqlite3.IntegrityError
 
         except Exception as e:
             self.db.conn.rollback()
@@ -73,6 +68,8 @@ class ExpenseManager(Manager):
         """
         Settle a portion of the debt by recording a payment from the payer to the receiver.
         """
+        if not isinstance(amount,(float,int)):
+            raise TypeError("Amount must be a positive number.")
         if amount <= 0:
             raise ValueError("Amount must be a positive number.")
         self.db.cursor.execute("select * from debts where creditor = ? and debtor = ?",(receiver, payer))
@@ -83,28 +80,15 @@ class ExpenseManager(Manager):
         try:
             #self.db.cursor.execute("UPDATE balances SET balance = balance + ? WHERE user = ?", (amount, receiver))
             #self.db.cursor.execute("UPDATE balances SET balance = balance - ? WHERE user = ?", (amount, payer))
-
             self.db.cursor.execute("UPDATE debts SET amount = amount - ? where creditor = ? and debtor = ?",
             (amount,receiver,payer))
             # Commit changes
             self.db.conn.commit()
             return print(f"Payment of {amount:.2f} from {payer} to {receiver} recorded successfully.")
 
-        except ValueError as ve:
-            self.db.conn.rollback()
-            print(f"ValueError: {ve}")
-
-        except sqlite3.IntegrityError as ie:
-            self.db.conn.rollback()
-            print(f"IntegrityError: {ie}")
-
-        except sqlite3.OperationalError as oe:
-            self.db.conn.rollback()
-            print(f"OperationalError: {oe}")
-
         except Exception as e:
             self.db.conn.rollback()
             print(f"An unexpected error occurred: {e}")
-
+            raise e
 
 
