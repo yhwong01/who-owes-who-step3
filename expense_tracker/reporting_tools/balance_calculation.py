@@ -5,44 +5,59 @@ class BalanceManager:
     def calculate_debts(self):
         #fixed bugs in SQL, now ensure unique (creditor, debtor) pairs in either (debtor, creditor) or (creditor, debtor)
         """Calculate detailed debts between users."""
-        self.db.cursor.execute("DELETE FROM debts")
-        self.db.cursor.execute("SELECT * FROM expenses")
 
-        for expense in self.db.cursor.fetchall():
-            payer = expense[1] # access payer
-            amount = expense[2] # access amount
-            participants = expense[3].split(",")
-            share = amount / len(participants)
+        try:
+            self.db.cursor.execute("DELETE FROM debts")
+            self.db.cursor.execute("SELECT * FROM expenses")
 
-            for participant in participants:
-                if participant != payer:
-                    # Check if an existing debt exist
-                    existing_debt = self.db.cursor.execute(
-                        "SELECT creditor, debtor, amount FROM debts WHERE (creditor = ? AND debtor = ?) OR (creditor = ? AND debtor = ?)",
-                        (payer, participant, participant, payer)
-                    ).fetchone()
+            for expense in self.db.cursor.fetchall():
+                payer = expense[1] # access payer
+                amount = expense[2] # access amount
+                participants = expense[3].split(",")
+                
+                if not participants or participants == [""]:
+                    raise ValueError("Participants list cannot be empty.")
+                
+                share = amount / len(participants)
 
-                    if existing_debt:
-                        creditor, debtor, amount = existing_debt
-                        if creditor == payer:
-                            # Update the existing record
-                            self.db.cursor.execute(
-                                "UPDATE debts SET amount = amount + ? WHERE creditor = ? AND debtor = ?",
-                                (share, payer, participant)
-                            )
+                for participant in participants:
+                    if participant != payer:
+                        # Check if an existing debt exist
+                        existing_debt = self.db.cursor.execute(
+                            "SELECT creditor, debtor, amount FROM debts WHERE (creditor = ? AND debtor = ?) OR (creditor = ? AND debtor = ?)",
+                            (payer, participant, participant, payer)
+                        ).fetchone()
+
+                        if existing_debt:
+                            creditor, debtor, amount = existing_debt
+                            if creditor == payer:
+                                # Update the existing record
+                                self.db.cursor.execute(
+                                    "UPDATE debts SET amount = amount + ? WHERE creditor = ? AND debtor = ?",
+                                    (share, payer, participant)
+                                )
+                            else:
+                                # Reverse the amount since the roles are reversed
+                                self.db.cursor.execute(
+                                    "UPDATE debts SET amount = amount - ? WHERE creditor = ? AND debtor = ?",
+                                    (share, participant, payer)
+                                )
                         else:
-                            # Reverse the amount since the roles are reversed
+                            # No existing debt, insert a new debt relationship
                             self.db.cursor.execute(
-                                "UPDATE debts SET amount = amount - ? WHERE creditor = ? AND debtor = ?",
-                                (share, participant, payer)
+                                "INSERT INTO debts (creditor, debtor, amount) VALUES (?, ?, ?)",
+                                (payer, participant, share)
                             )
-                    else:
-                        # No existing debt, insert a new debt relationship
-                        self.db.cursor.execute(
-                            "INSERT INTO debts (creditor, debtor, amount) VALUES (?, ?, ?)",
-                            (payer, participant, share)
-                        )
-        self.db.conn.commit()
+            self.db.conn.commit()
+
+        except ValueError as e:
+            self.db.conn.rollback()
+            print(f"Error: {e}")
+            raise
+        except Exception as e:
+            self.db.conn.rollback()
+            print(f"An unexpected error occurred: {e}")
+            raise
 
 
     # def simplify_debts(self):
@@ -97,34 +112,45 @@ class BalanceManager:
 
     def get_user_debts(self, user):
         """Retrieve detailed debt information for a specific user."""
-        creditors = self.db.cursor.execute(
-            "SELECT debtor, amount FROM debts WHERE creditor = ?", (user,)
-        ).fetchall()
+        if not user or not isinstance(user, str):
+            raise ValueError("Invalid user provided. User must be a non-empty string.")
 
-        debtors = self.db.cursor.execute(
-            "SELECT creditor, amount FROM debts WHERE debtor = ?", (user,)
-        ).fetchall()
+        try:
+            creditors = self.db.cursor.execute(
+                "SELECT debtor, amount FROM debts WHERE creditor = ?", (user,)
+            ).fetchall()
 
-        if creditors:
-            total_credit = sum(amount for _, amount in creditors)
-            print("### Amounts Owed to You:")
-            for debtor, amount in creditors:
-                print(f"- {debtor} owes you: ${amount:.2f}")
-            print(f"\n💰Total Amount Owed to You: ${total_credit:.2f}")
-        else:
-            print("### Amounts Owed to You: No one owes you money.")
+            debtors = self.db.cursor.execute(
+                "SELECT creditor, amount FROM debts WHERE debtor = ?", (user,)
+            ).fetchall()
 
-        if debtors:
-            total_debt = sum(amount for _, amount in debtors)
-            print("\n### Amounts You Owe:")
-            for creditor, amount in debtors:
-                print(f"- You owe {creditor}: ${amount:.2f}")
-            print(f"\n💰Total Amount You Owe: ${total_debt:.2f}")
-        else:
-            print("\n### Amounts You Owe: You don’t owe anyone money.\n")
+            if creditors:
+                total_credit = sum(amount for _, amount in creditors)
+                print("### Amounts Owed to You:")
+                for debtor, amount in creditors:
+                    print(f"- {debtor} owes you: ${amount:.2f}")
+                print(f"\n💰Total Amount Owed to You: ${total_credit:.2f}")
+            else:
+                print("### Amounts Owed to You: No one owes you money.")
 
-        return
+            if debtors:
+                total_debt = sum(amount for _, amount in debtors)
+                print("\n### Amounts You Owe:")
+                for creditor, amount in debtors:
+                    print(f"- You owe {creditor}: ${amount:.2f}")
+                print(f"\n💰Total Amount You Owe: ${total_debt:.2f}")
+            else:
+                print("\n### Amounts You Owe: You don’t owe anyone money.\n")
 
+            return
+        except ValueError as e:
+            print(f"Error: {e}")
+            raise
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            raise
+
+        
     # def update_negative_debts(self):
     #     """Interchange the creditor and debtor if the debt amount is negative."""
     #     neg_debt = self.db.cursor.execute(
