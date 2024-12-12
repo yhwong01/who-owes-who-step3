@@ -3,6 +3,7 @@ import sys
 import os
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+print(PROJECT_ROOT)
 sys.path.append(PROJECT_ROOT)
 
 # Add subdirectories to the Python path if necessary
@@ -68,11 +69,12 @@ if __name__ == "__main__":
         print("\nErrors:")
         for test, traceback in result.errors:
             print(f"{test}: {traceback}")
+        exit(1)
 
     #print failures
     if result.failures:
         print("\nFailures:")
         for test, traceback in result.failures:
             print(f"{test}: {traceback}")
-
+        exit(1)
 

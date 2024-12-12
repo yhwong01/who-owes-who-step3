@@ -119,7 +119,7 @@ class ReportGeneration:
             df = pd.DataFrame(debts)
             df.to_excel(f"{file_name}.xlsx", index=False)
         else:
-            raise ValueError("Invalid file format. Choose 'txt', 'csv', or 'xlsx'.")
+            raise ValueError("Invalid fil   e format. Choose 'txt', 'csv', or 'xlsx'.")
 
 
 

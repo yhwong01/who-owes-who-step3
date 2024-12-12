@@ -1,0 +1,15 @@
+
+            ### Expense Report for Alice (Generated on 2024-12-10 12:00:00):
+            
+            **Expense History:**
+            - Payer: Alice, Amount: $30.00, Participants: Alice,Bob,Charlie
+            - Payer: Alice, Amount: $50.00, Participants: Alice,Bob
+            
+            **Debt Situation:**
+            - You owe Bob: $10.00
+            - Charlie owes you: $15.00
+            
+            **Summary:**
+            - Total Amount You Owe: $10.00
+            - Total Amount Owed to You: $15.00
+            
