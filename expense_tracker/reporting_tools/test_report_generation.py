@@ -103,6 +103,44 @@ class TestReportGeneration(unittest.TestCase):
         for file in txt_files + csv_files + xlsx_files:
             os.remove(file)
 
+        
+        from expense_tracker.reporting_tools.balance_calculation import BalanceManager
+        from expense_tracker.reporting_tools.report_generation import ReportGeneration     
+        from expense_tracker.expense_management.db_management import DatabaseManager
+
+        db = DatabaseManager("expense_tracker.db")
+        sample_expenses = [
+            ("Alice", 60.0, "Alice,Bob,Charlie"),  # Alice pays for Bob and Charlie
+            ("Dave", 30.0, "Dave,Alice"),          # Dave pays and includes Alice
+            ("Alice", 50.0, "Alice,Eve"),          # Alice pays for Eve
+            ("Frank", 100.0, "Frank,Alice"),       # Frank pays for Alice
+            ("George", 80.0, "George,Alice"),      # George pays for Alice
+            ("Alice", 20.0, "Alice,Hannah"),       # Alice pays for Hannah
+        ]
+
+        # Insert these expenses into the `expenses` table
+        for payer, amount, participants in sample_expenses:
+            db.cursor.execute(
+                "INSERT INTO expenses (payer, amount, participants) VALUES (?, ?, ?)",
+                (payer, amount, participants),
+            )
+
+        balance_manager = BalanceManager(db)
+        balance_manager.calculate_debts()
+
+        new = db.cursor.execute("SELECT * FROM debts").fetchall()
+        print("Debts after calculation:", new)
+
+        db.conn.commit()
+
+        report_gen = ReportGeneration(db)
+        print("Before exporting report")
+        report_gen.export_report("Alice", file_format="txt")  # Export as a text file
+        report_gen.export_report("Alice", file_format="csv")  # Export as a CSV file
+        report_gen.export_report("Alice", file_format="xlsx") # Export as an Excel file
+        print("Report exported successfully.")
+
+
     @classmethod
     def visualize_balances(cls, db, current_user):
         """
@@ -133,6 +171,8 @@ class TestReportGeneration(unittest.TestCase):
         plt.title(f"Debt Summary for {current_user}")
         plt.grid(axis='y', linestyle="--", alpha=0.7)
         plt.show()
+
+
 
     @classmethod
     def initialize_db(cls, db):
@@ -214,6 +254,36 @@ class TestReportGeneration(unittest.TestCase):
         
         # Test if debts are fetched as a valid list from the database
         assert isinstance(debts, list), "Debts should be retrieved as a list from the database."
+
+        db = DatabaseManager("expense_tracker.db")
+        sample_expenses = [
+            ("Alice", 60.0, "Alice,Bob,Charlie"),  # Alice pays for Bob and Charlie
+            ("Dave", 30.0, "Dave,Alice"),          # Dave pays and includes Alice
+            ("Alice", 50.0, "Alice,Eve"),          # Alice pays for Eve
+            ("Frank", 100.0, "Frank,Alice"),       # Frank pays for Alice
+            ("George", 80.0, "George,Alice"),      # George pays for Alice
+            ("Alice", 20.0, "Alice,Hannah"),       # Alice pays for Hannah
+        ]
+
+        # Insert these expenses into the `expenses` table
+        for payer, amount, participants in sample_expenses:
+            db.cursor.execute(
+                "INSERT INTO expenses (payer, amount, participants) VALUES (?, ?, ?)",
+                (payer, amount, participants),
+            )
+
+        balance_manager = BalanceManager(db)
+        balance_manager.calculate_debts()
+
+        new = db.cursor.execute("SELECT * FROM debts").fetchall()
+        print("Debts after calculation:", new)
+
+        db.conn.commit()
+
+        report_gen = ReportGeneration(db)
+        print("Before calling visualize_simple_debt_summary")
+        report_gen.visualize_balances("Alice")
+        print("After calling visualize_simple_debt_summary")
 
 if __name__ == "__main__":
     unittest.main()

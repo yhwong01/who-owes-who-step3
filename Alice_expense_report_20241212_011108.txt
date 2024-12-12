@@ -1,0 +1,119 @@
+### Expense Report for Alice (Generated on 2024-12-12 01:11:08.575059):
+
+**Expense History:**
+- Payer: Alice, Amount: $100.00, Participants: Alice,Bob,Charlie
+- Payer: Alice, Amount: $60.00, Participants: Alice,Bob,Charlie
+- Payer: Dave, Amount: $30.00, Participants: Dave,Alice
+- Payer: Alice, Amount: $50.00, Participants: Alice,Eve
+- Payer: Frank, Amount: $100.00, Participants: Frank,Alice
+- Payer: George, Amount: $80.00, Participants: George,Alice
+- Payer: Alice, Amount: $20.00, Participants: Alice,Hannah
+- Payer: Alice, Amount: $60.00, Participants: Alice,Bob,Charlie
+- Payer: Dave, Amount: $30.00, Participants: Dave,Alice
+- Payer: Alice, Amount: $50.00, Participants: Alice,Eve
+- Payer: Frank, Amount: $100.00, Participants: Frank,Alice
+- Payer: George, Amount: $80.00, Participants: George,Alice
+- Payer: Alice, Amount: $20.00, Participants: Alice,Hannah
+- Payer: Alice, Amount: $60.00, Participants: Alice,Bob,Charlie
+- Payer: Dave, Amount: $30.00, Participants: Dave,Alice
+- Payer: Alice, Amount: $50.00, Participants: Alice,Eve
+- Payer: Frank, Amount: $100.00, Participants: Frank,Alice
+- Payer: George, Amount: $80.00, Participants: George,Alice
+- Payer: Alice, Amount: $20.00, Participants: Alice,Hannah
+- Payer: Alice, Amount: $60.00, Participants: Alice,Bob,Charlie
+- Payer: Dave, Amount: $30.00, Participants: Dave,Alice
+- Payer: Alice, Amount: $50.00, Participants: Alice,Eve
+- Payer: Frank, Amount: $100.00, Participants: Frank,Alice
+- Payer: George, Amount: $80.00, Participants: George,Alice
+- Payer: Alice, Amount: $20.00, Participants: Alice,Hannah
+- Payer: Alice, Amount: $60.00, Participants: Alice,Bob,Charlie
+- Payer: Dave, Amount: $30.00, Participants: Dave,Alice
+- Payer: Alice, Amount: $50.00, Participants: Alice,Eve
+- Payer: Frank, Amount: $100.00, Participants: Frank,Alice
+- Payer: George, Amount: $80.00, Participants: George,Alice
+- Payer: Alice, Amount: $20.00, Participants: Alice,Hannah
+- Payer: Alice, Amount: $60.00, Participants: Alice,Bob,Charlie
+- Payer: Dave, Amount: $30.00, Participants: Dave,Alice
+- Payer: Alice, Amount: $50.00, Participants: Alice,Eve
+- Payer: Frank, Amount: $100.00, Participants: Frank,Alice
+- Payer: George, Amount: $80.00, Participants: George,Alice
+- Payer: Alice, Amount: $20.00, Participants: Alice,Hannah
+- Payer: Alice, Amount: $60.00, Participants: Alice,Bob,Charlie
+- Payer: Dave, Amount: $30.00, Participants: Dave,Alice
+- Payer: Alice, Amount: $50.00, Participants: Alice,Eve
+- Payer: Frank, Amount: $100.00, Participants: Frank,Alice
+- Payer: George, Amount: $80.00, Participants: George,Alice
+- Payer: Alice, Amount: $20.00, Participants: Alice,Hannah
+- Payer: Alice, Amount: $60.00, Participants: Alice,Bob,Charlie
+- Payer: Dave, Amount: $30.00, Participants: Dave,Alice
+- Payer: Alice, Amount: $50.00, Participants: Alice,Eve
+- Payer: Frank, Amount: $100.00, Participants: Frank,Alice
+- Payer: George, Amount: $80.00, Participants: George,Alice
+- Payer: Alice, Amount: $20.00, Participants: Alice,Hannah
+- Payer: Alice, Amount: $60.00, Participants: Alice,Bob,Charlie
+- Payer: Dave, Amount: $30.00, Participants: Dave,Alice
+- Payer: Alice, Amount: $50.00, Participants: Alice,Eve
+- Payer: Frank, Amount: $100.00, Participants: Frank,Alice
+- Payer: George, Amount: $80.00, Participants: George,Alice
+- Payer: Alice, Amount: $20.00, Participants: Alice,Hannah
+- Payer: Alice, Amount: $60.00, Participants: Alice,Bob,Charlie
+- Payer: Dave, Amount: $30.00, Participants: Dave,Alice
+- Payer: Alice, Amount: $50.00, Participants: Alice,Eve
+- Payer: Frank, Amount: $100.00, Participants: Frank,Alice
+- Payer: George, Amount: $80.00, Participants: George,Alice
+- Payer: Alice, Amount: $20.00, Participants: Alice,Hannah
+- Payer: Alice, Amount: $60.00, Participants: Alice,Bob,Charlie
+- Payer: Dave, Amount: $30.00, Participants: Dave,Alice
+- Payer: Alice, Amount: $50.00, Participants: Alice,Eve
+- Payer: Frank, Amount: $100.00, Participants: Frank,Alice
+- Payer: George, Amount: $80.00, Participants: George,Alice
+- Payer: Alice, Amount: $20.00, Participants: Alice,Hannah
+- Payer: Alice, Amount: $60.00, Participants: Alice,Bob,Charlie
+- Payer: Dave, Amount: $30.00, Participants: Dave,Alice
+- Payer: Alice, Amount: $50.00, Participants: Alice,Eve
+- Payer: Frank, Amount: $100.00, Participants: Frank,Alice
+- Payer: George, Amount: $80.00, Participants: George,Alice
+- Payer: Alice, Amount: $20.00, Participants: Alice,Hannah
+- Payer: Alice, Amount: $60.00, Participants: Alice,Bob,Charlie
+- Payer: Dave, Amount: $30.00, Participants: Dave,Alice
+- Payer: Alice, Amount: $50.00, Participants: Alice,Eve
+- Payer: Frank, Amount: $100.00, Participants: Frank,Alice
+- Payer: George, Amount: $80.00, Participants: George,Alice
+- Payer: Alice, Amount: $20.00, Participants: Alice,Hannah
+- Payer: Alice, Amount: $60.00, Participants: Alice,Bob,Charlie
+- Payer: Dave, Amount: $30.00, Participants: Dave,Alice
+- Payer: Alice, Amount: $50.00, Participants: Alice,Eve
+- Payer: Frank, Amount: $100.00, Participants: Frank,Alice
+- Payer: George, Amount: $80.00, Participants: George,Alice
+- Payer: Alice, Amount: $20.00, Participants: Alice,Hannah
+- Payer: Alice, Amount: $60.00, Participants: Alice,Bob,Charlie
+- Payer: Dave, Amount: $30.00, Participants: Dave,Alice
+- Payer: Alice, Amount: $50.00, Participants: Alice,Eve
+- Payer: Frank, Amount: $100.00, Participants: Frank,Alice
+- Payer: George, Amount: $80.00, Participants: George,Alice
+- Payer: Alice, Amount: $20.00, Participants: Alice,Hannah
+- Payer: Alice, Amount: $60.00, Participants: Alice,Bob,Charlie
+- Payer: Dave, Amount: $30.00, Participants: Dave,Alice
+- Payer: Alice, Amount: $50.00, Participants: Alice,Eve
+- Payer: Frank, Amount: $100.00, Participants: Frank,Alice
+- Payer: George, Amount: $80.00, Participants: George,Alice
+- Payer: Alice, Amount: $20.00, Participants: Alice,Hannah
+- Payer: Alice, Amount: $60.00, Participants: Alice,Bob,Charlie
+- Payer: Dave, Amount: $30.00, Participants: Dave,Alice
+- Payer: Alice, Amount: $50.00, Participants: Alice,Eve
+- Payer: Frank, Amount: $100.00, Participants: Frank,Alice
+- Payer: George, Amount: $80.00, Participants: George,Alice
+- Payer: Alice, Amount: $20.00, Participants: Alice,Hannah
+
+**Debt Situation:**
+- Bob owes you: $373.33
+- Charlie owes you: $373.33
+- You owe Dave: $255.00
+- Eve owes you: $425.00
+- You owe Frank: $850.00
+- You owe George: $680.00
+- Hannah owes you: $170.00
+
+**Summary:**
+- Total Amount You Owe: $1785.00
+- Total Amount Owed to You: $1341.67

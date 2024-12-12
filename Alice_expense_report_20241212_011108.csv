@@ -1,0 +1,8 @@
+Debtor,Creditor,Amount
+Bob,Alice,373.33333333333337
+Charlie,Alice,373.33333333333337
+Alice,Dave,255.0
+Eve,Alice,425.0
+Alice,Frank,850.0
+Alice,George,680.0
+Hannah,Alice,170.0
