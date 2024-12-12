@@ -18,6 +18,11 @@ class ExpenseManager(Manager):
         # either the payer is involved or not for calculating balances
         if not isinstance(participants, list) or not all(isinstance(p, str) for p in participants):
             raise TypeError("Participants must be a list of strings.")
+
+        if not isinstance(amount, (float, int)):
+            raise TypeError("Amount must be a positive number.")
+        if amount <= 0:
+            raise ValueError("Amount must be a positive number.")
         try:
             # Insert expense
             self.db.cursor.execute("""
@@ -28,10 +33,6 @@ class ExpenseManager(Manager):
             self.db.conn.commit()
             return f"Expense of {amount} added for {payer}, split among {participants}."
 
-        except sqlite3.IntegrityError as oe:
-               self.db.conn.rollback()
-               print(f"IntegrityError: {oe}")
-               raise sqlite3.IntegrityError
 
         except Exception as e:
             raise Exception

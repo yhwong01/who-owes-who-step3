@@ -7,7 +7,7 @@ class TestExpenseManager(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.conn = sqlite3.connect(":memory:")
-        cls.conn.execute("CREATE TABLE expenses (id INTEGER PRIMARY KEY, payer TEXT, amount REAL CHECK(TYPEOF(amount) = 'real'), participants TEXT)")
+        cls.conn.execute("CREATE TABLE expenses (id INTEGER PRIMARY KEY, payer TEXT, amount REAL , participants TEXT)")
         cls.conn.execute("CREATE TABLE debts (creditor TEXT, debtor TEXT, amount REAL)")
         cls.cursor = cls.conn.cursor()
         cls.manager = ExpenseManager(db=cls)
@@ -34,8 +34,11 @@ class TestExpenseManager(unittest.TestCase):
         with self.assertRaises(TypeError):
             self.manager.add_expense("Alice",10,[1,2])
 
-        with self.assertRaises(sqlite3.IntegrityError):
+        with self.assertRaises(TypeError):
             self.manager.add_expense("Alice","asd",["Alice", "Bob"])
+
+        with self.assertRaises(ValueError):
+            self.manager.add_expense("Alice", -100, ["Alice", "Bob"])
 
         with self.assertRaises(Exception):
             self.manager.add_expense(None,None,None)
