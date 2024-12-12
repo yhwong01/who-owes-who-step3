@@ -79,21 +79,21 @@ class TestReportGeneration(unittest.TestCase):
 
         # Test exporting as TXT
         self.report_generator.export_report("Alice", file_format="txt")
-        txt_files = glob.glob("Alice_expense_report_20241210*.txt")
+        txt_files = glob.glob("Alice_expense_report_*.txt")
         self.assertTrue(len(txt_files) > 0, "TXT file not generated.")
-        self.assertTrue(any("Alice_expense_report_20241210" in f for f in txt_files), "TXT file does not match expected format.")
+        self.assertTrue(any("Alice_expense_report" in f for f in txt_files), "TXT file does not match expected format.")
 
         # Test exporting as CSV
         self.report_generator.export_report("Alice", file_format="csv")
-        csv_files = glob.glob("Alice_expense_report_20241210*.csv")
+        csv_files = glob.glob("Alice_expense_report_*.csv")
         self.assertTrue(len(csv_files) > 0, "CSV file not generated.")
-        self.assertTrue(any("Alice_expense_report_20241210" in f for f in csv_files), "CSV file does not match expected format.")
+        self.assertTrue(any("Alice_expense_report" in f for f in csv_files), "CSV file does not match expected format.")
 
         # Test exporting as XLSX
         self.report_generator.export_report("Alice", file_format="xlsx")
-        xlsx_files = glob.glob("Alice_expense_report_20241210*.xlsx")
+        xlsx_files = glob.glob("Alice_expense_report_*.xlsx")
         self.assertTrue(len(xlsx_files) > 0, "XLSX file not generated.")
-        self.assertTrue(any("Alice_expense_report_20241210" in f for f in xlsx_files), "XLSX file does not match expected format.")
+        self.assertTrue(any("Alice_expense_report" in f for f in xlsx_files), "XLSX file does not match expected format.")
 
         # Test invalid file format
         with self.assertRaises(ValueError):

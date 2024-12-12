@@ -11,6 +11,7 @@ def add_user(user_manager):
     result = user_manager.add_user(name,bal)
     print(result)
 
+
 def add_expense(expense_manager):
     payer = input("Enter the name of the payer: ").strip()
     amount = float(input("Enter the expense amount: ").strip())
