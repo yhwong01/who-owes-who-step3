@@ -214,6 +214,6 @@ class TestReportGeneration(unittest.TestCase):
         
         # Test if debts are fetched as a valid list from the database
         assert isinstance(debts, list), "Debts should be retrieved as a list from the database."
-
+        db.close()
 if __name__ == "__main__":
     unittest.main()
