@@ -140,6 +140,16 @@ class TestReportGeneration(unittest.TestCase):
         report_gen.export_report("Alice", file_format="xlsx") # Export as an Excel file
         print("Report exported successfully.")
 
+        # Clean up generated files
+        files_to_delete = [
+            filename for filename in os.listdir(".") 
+            if filename.startswith("Alice_expense_report") and filename.endswith((".txt", ".csv", ".xlsx"))
+        ]
+
+        for file in files_to_delete:
+            os.remove(file)
+            print(f"Deleted file: {file}")
+
 
     @classmethod
     def visualize_balances(cls, db, current_user):
