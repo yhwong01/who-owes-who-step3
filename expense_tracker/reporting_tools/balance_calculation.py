@@ -15,7 +15,7 @@ class BalanceManager:
                 amount = expense[2] # access amount
                 participants = expense[3].split(",")
                 
-                if len(participants) == 0:
+                if not participants or participants == [""]:
                     raise ValueError("Participants list cannot be empty.")
                 
                 share = amount / len(participants)
