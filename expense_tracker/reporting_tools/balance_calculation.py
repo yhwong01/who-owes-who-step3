@@ -5,8 +5,7 @@ class BalanceManager:
     def calculate_debts(self):
         #fixed bugs in SQL, now ensure unique (creditor, debtor) pairs in either (debtor, creditor) or (creditor, debtor)
         """Calculate detailed debts between users."""
-        print("Hello")
-
+        print("hi, welcome to calculate debt")
         try:
             self.db.cursor.execute("DELETE FROM debts")
             self.db.cursor.execute("SELECT * FROM expenses")
