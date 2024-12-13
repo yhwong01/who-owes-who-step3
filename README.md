@@ -2,11 +2,15 @@
 
 ![Passing Build Stamp](https://app.travis-ci.com/yhwong01/who-owes-who-step3.svg?token=sSxpVi7UMFCV6y91PqY5&branch=main)
 
-## Watch the demo here:
-[demo](https://youtu.be/uTXSjDfg8Ms)
-
 ## Overview
 `Who Owes Who` is a Python package designed to manage shared expenses among users. It provides functionality to track expenses, calculate balances, simplify debts, and generate reports with detailed visualizations. This package is built for users who need to manage group expenses efficiently and keep track of debts.
+
+---
+
+## Demo and Installation
+
+- **[Demo Video](https://youtu.be/uTXSjDfg8Ms)**
+- **[PyPI Package](https://pypi.org/project/who-owes-who/0.1.0/)**
 
 ---
 
