@@ -195,5 +195,3 @@ class BalanceManager:
                 (creditor, debtor)
             )
             self.db.conn.commit()
-
-        print("\n### Converted negative debts successfully")
