@@ -37,7 +37,7 @@ def simplify_debts(balance_calculator):
 def generate_report(report_generator):
     print("\nGenerating Report...")
     #balances = balance_calculator.calculate_balances()
-    user_choice = input("Enter user name: ").strip().lower()
+    user_choice = input("Enter user name: ").strip()
     print(report_generator.generate_summary(user_choice))
 
     """format_choice = input("Enter report format (txt or csv): ").strip().lower()
@@ -71,9 +71,10 @@ def settle_debts(expense_manager):
     except Exception as e:
         print(f"An error occurred: {e}")
 def export_report(report_generator):
+    user_input = input("Enter the name of the user: ")
     format_choice = input("Enter report format (txt, csv, or xlsx): ").lower()
     if format_choice in ["txt","csv","xlsx"]:
-        print(report_generator.export_report(format_choice))
+        print(report_generator.export_report(user_input, format_choice))
     else:
         print("Invalid format. Report export canceled.")
 
@@ -110,7 +111,8 @@ def main():
         print("9. Settle debts")
         print("10. Calculate debts")
         print("11. Show user debts")
-        print("12. Exit")
+        print("12. Export report")
+        print("13. Exit")
         #remove expense
 
         choice = input("Enter your choice (1-12): \n").strip()
@@ -139,6 +141,8 @@ def main():
             user = input("Enter the name of the user to view debts: ")
             balance_manager.get_user_debts(user)
         elif choice == "12":
+            export_report(report_generator)
+        elif choice == "13":
             print("\n--- Thank you for using Expense Tracker! Goodbye! ---")
             break
         else:
