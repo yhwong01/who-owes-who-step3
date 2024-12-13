@@ -31,10 +31,6 @@ print("\nExpenses:")
 for expense in expense_manager.list_expenses():
     print(expense)
 
-# Calculate balances and debts
-print("\nCalculating balances...")
-balance_manager.calculate_balances()
-
 print("\nDebts:")
 balance_manager.calculate_debts()
 
