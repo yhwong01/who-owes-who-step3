@@ -5,6 +5,7 @@ class BalanceManager:
     def calculate_debts(self):
         #fixed bugs in SQL, now ensure unique (creditor, debtor) pairs in either (debtor, creditor) or (creditor, debtor)
         """Calculate detailed debts between users."""
+        print("Hello")
 
         try:
             self.db.cursor.execute("DELETE FROM debts")
@@ -48,6 +49,7 @@ class BalanceManager:
                                 "INSERT INTO debts (creditor, debtor, amount) VALUES (?, ?, ?)",
                                 (payer, participant, share)
                             )
+            print("Calculate_debts called")
             self.db.conn.commit()
 
         except ValueError as e:

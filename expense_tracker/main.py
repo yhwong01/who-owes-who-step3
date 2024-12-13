@@ -3,7 +3,7 @@ from expense_management.user_management import UserManager
 from expense_management.expense_operations import ExpenseManager
 
 from reporting_tools.balance_calculation import BalanceManager
-from expense_tracker.reporting_tools.report_generation import ReportGeneration
+from reporting_tools.report_generation import ReportGeneration
 
 def add_user(user_manager):
     name = input("Enter the name of the user to add: ").strip()
@@ -37,11 +37,8 @@ def simplify_debts(balance_calculator):
 def generate_report(report_generator):
     print("\nGenerating Report...")
     #balances = balance_calculator.calculate_balances()
-    format_choice = input("Enter report format ('text' or 'json'): ").strip().lower()
-    if format_choice in ["text", "json"]:
-        print(report_generator.generate_summary(format_choice))
-    else:
-        print("Invalid format. Report generation canceled.")
+    user_choice = input("Enter user name: ").strip().lower()
+    print(report_generator.generate_summary(user_choice))
 
     """format_choice = input("Enter report format (txt or csv): ").strip().lower()
     if format_choice in ["txt", "csv"]:
@@ -116,7 +113,7 @@ def main():
         print("12. Exit")
         #remove expense
 
-        choice = input("Enter your choice (1-13): \n").strip()
+        choice = input("Enter your choice (1-12): \n").strip()
 
         if choice == "1":
             add_user(user_manager)
