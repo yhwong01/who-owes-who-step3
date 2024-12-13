@@ -39,7 +39,9 @@ class TestBalanceCalculation(unittest.TestCase):
         print("Tearing down after a test...")
 
     def test_calculate_debts(self):
-        """Test the calculate_debts function."""
+        """Test the calculate_debts function with different scenarios."""
+
+        # Case 1: Normal calculation with multiple participants
         self.mock_cursor.fetchall.side_effect = [
             [
                 (1, "Alice", 30.0, "Alice,Bob,Charlie"),
@@ -58,10 +60,58 @@ class TestBalanceCalculation(unittest.TestCase):
             "INSERT INTO debts (creditor, debtor, amount) VALUES (?, ?, ?)",
             ("Bob", "Charlie", 10.0),
         )
-        self.assertEqual(self.mock_cursor.execute.call_count, 8)  # Adjusted count
+        self.assertEqual(self.mock_cursor.execute.call_count, 8)
+
+        # Case 2: Empty participants list
+        self.mock_cursor.fetchall.side_effect = [
+            [
+                (1, "Alice", 30.0, ""),  # No participants
+            ]
+        ]
+
+        with self.assertRaises(ValueError) as e:
+            self.balance_manager.calculate_debts()
+        self.assertIn("Participants list cannot be empty", str(e.exception))
+
+        # Case 3: Single participant (no debt creation)
+        self.mock_cursor.fetchall.side_effect = [
+            [
+                (1, "Alice", 30.0, "Alice"),  # Only the payer
+            ]
+        ]
+
+        self.balance_manager.calculate_debts()
+        self.mock_cursor.execute.assert_any_call("DELETE FROM debts")
+        self.assertEqual(self.mock_cursor.execute.call_count, 12)  # Only DELETE command
+
+        # Case 4: Error during database operation
+        self.mock_cursor.execute.side_effect = Exception("Database error")
+        with self.assertRaises(Exception) as e:
+            self.balance_manager.calculate_debts()
+        self.assertIn("Database error", str(e.exception))
+
+        # Case 5: Debt reversal (existing reversed debt scenario)
+        self.mock_cursor.fetchall.side_effect = [
+            [
+                (1, "Alice", 30.0, "Alice,Bob"),
+            ],
+            [
+                ("Bob", "Alice", 10.0),  # Existing reversed debt
+            ]
+        ]
+        
+        # self.mock_cursor.execute.side_effect = None  # Reset exception
+        # self.balance_manager.calculate_debts()
+        # self.mock_cursor.execute.assert_any_call(
+        #     "UPDATE debts SET amount = amount - ? WHERE creditor = ? AND debtor = ?",
+        #     (15.0, "Bob", "Alice"),
+        # )
+        # self.assertEqual(self.mock_cursor.execute.call_count, 6)
+
 
     def test_get_user_debts(self):
-        """Test the get_user_debts function."""
+        """Test the get_user_debts function with multiple scenarios."""
+        # Scenario 1: Valid user with creditors and debtors
         self.mock_cursor.fetchall.side_effect = [
             [("Bob", 10.0), ("Charlie", 15.0)],  # Creditors
             [("Alice", 20.0)],                  # Debtors
@@ -69,6 +119,7 @@ class TestBalanceCalculation(unittest.TestCase):
 
         self.balance_manager.get_user_debts("Alice")
 
+        # Verify SQL queries
         self.mock_cursor.execute.assert_any_call(
             "SELECT debtor, amount FROM debts WHERE creditor = ?", ("Alice",)
         )
@@ -76,6 +127,37 @@ class TestBalanceCalculation(unittest.TestCase):
             "SELECT creditor, amount FROM debts WHERE debtor = ?", ("Alice",)
         )
         self.assertEqual(self.mock_cursor.execute.call_count, 2)  # Two SELECT queries
+
+        # Verify fetchall call count
+        self.assertEqual(self.mock_cursor.fetchall.call_count, 2)
+
+        # Scenario 2: User with no creditors or debtors
+        self.mock_cursor.fetchall.side_effect = [[], []]  # No creditors, no debtors
+        self.balance_manager.get_user_debts("Bob")
+        self.mock_cursor.execute.assert_any_call(
+            "SELECT debtor, amount FROM debts WHERE creditor = ?", ("Bob",)
+        )
+        self.mock_cursor.execute.assert_any_call(
+            "SELECT creditor, amount FROM debts WHERE debtor = ?", ("Bob",)
+        )
+        self.assertEqual(self.mock_cursor.fetchall.call_count, 4)  # Total fetchall calls so far
+
+        # Scenario 3: Invalid user (empty string)
+        with self.assertRaises(ValueError) as e:
+            self.balance_manager.get_user_debts("")
+        self.assertEqual(str(e.exception), "Invalid user provided. User must be a non-empty string.")
+
+        # Scenario 4: Invalid user (non-string)
+        with self.assertRaises(ValueError) as e:
+            self.balance_manager.get_user_debts(None)
+        self.assertEqual(str(e.exception), "Invalid user provided. User must be a non-empty string.")
+
+        # Scenario 5: Handle unexpected database exceptions
+        self.mock_cursor.execute.side_effect = Exception("Database error")
+        with self.assertRaises(Exception) as e:
+            self.balance_manager.get_user_debts("Charlie")
+        self.assertEqual(str(e.exception), "Database error")
+
 
     def test_update_negative_debts(self):
         """Test the update_negative_debts function."""
